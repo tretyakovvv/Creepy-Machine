@@ -263,10 +263,30 @@ function getPlanPrice(plan) {
   return Number.isFinite(value) && value > 0 ? value.toFixed(2) : "0.00";
 }
 
+function isLocalSiteUrl(value) {
+  if (!value) return true;
+  try {
+    const url = new URL(value);
+    return ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+  } catch {
+    return true;
+  }
+}
+
+function getSiteUrl(req) {
+  const configured = process.env.SITE_URL;
+  if (configured && !isLocalSiteUrl(configured)) {
+    return configured;
+  }
+
+  const host = req.get("host");
+  if (!host) return configured || "";
+
+  return `${req.protocol}://${host}`;
+}
+
 function getReturnUrl(req, planId) {
-  const base =
-    process.env.SITE_URL ||
-    `${req.protocol}://${req.get("host")}`;
+  const base = getSiteUrl(req);
   return new URL(`/subscription.html?status=success&plan=${encodeURIComponent(planId)}`, base)
     .toString();
 }

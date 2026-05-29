@@ -48,6 +48,16 @@ const ENV_API_KEYS = {
   deepseek: "DEEPSEEK_API_KEY",
 };
 
+function isLocalSiteUrl(value) {
+  if (!value) return true;
+  try {
+    const url = new URL(value);
+    return ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+  } catch {
+    return true;
+  }
+}
+
 function cloneDefaults() {
   return structuredClone(DEFAULT_AI_PROVIDERS);
 }
@@ -366,7 +376,10 @@ export async function generateWithAi(prompt, lang, { providerId, modelId, intens
   };
 
   if (provider.id === "openrouter" || baseUrl.includes("openrouter")) {
-    headers["HTTP-Referer"] = process.env.SITE_URL || "http://localhost:3000";
+    const siteUrl = process.env.SITE_URL;
+    if (siteUrl && !isLocalSiteUrl(siteUrl)) {
+      headers["HTTP-Referer"] = siteUrl;
+    }
     headers["X-Title"] = "Creepy Machine";
   }
 
