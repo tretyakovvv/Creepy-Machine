@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signing in…</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="page-legal">
+  <main class="page page--narrow" style="text-align:center;padding:4rem 1rem;">
+    <h1>Signing in…</h1>
+    <p>Completing Google authentication</p>
+  </main>
+  <script src="../js/config.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    window.CMAuth.fetchPublicConfig().then(function () {
+      return window.CMAuth.restoreSession();
+    }).then(function (user) {
+      window.location.href = user ? "../index.html" : "../index.html?auth=failed";
+    });
+  </script>
+</body>
+</html>

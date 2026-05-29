@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscription — Creepy Machine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Creepster&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-subscription">
+  <div class="video-bg video-bg--subtle" aria-hidden="true">
+    <video id="bg-video" autoplay muted playsinline>
+      <source src="projects/Creepy Machine/osnova crip.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+    <div class="noise-overlay"></div>
+  </div>
+
+  <header id="site-header" class="site-header"></header>
+
+  <main class="page">
+    <section class="section section-head--center">
+      <h1 class="page-title" data-i18n="subscription.title">Unlock the Abyss</h1>
+      <p class="page-lead" data-i18n="subscription.subtitle">More generations, priority AI, exclusive styles</p>
+      <div id="subscription-benefits" class="subscription-benefits"></div>
+      <p id="payment-status" class="payment-status" hidden></p>
+      <p class="hint payment-note" data-i18n="subscription.paymentNote">Payments via YooKassa</p>
+      <p id="subscription-contact" class="subscription-contact"></p>
+    </section>
+
+    <div id="plans-grid" class="plans-grid"></div>
+
+    <section class="section subscription-faq-block">
+      <div class="section-head section-head--center">
+        <h2 data-i18n="subscription.faqTitle">FAQ</h2>
+        <p class="hint" data-i18n="subscription.faqSubtitle">Answers about plans, limits, and payments.</p>
+      </div>
+      <div id="faq-list" class="faq-list faq-list--wide"></div>
+    </section>
+
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n-extra.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/payments.js"></script>
+  <script src="js/video-loop.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/subscription-page.js"></script>
+</body>
+</html>

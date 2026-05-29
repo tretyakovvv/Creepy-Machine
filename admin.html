@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Creepy Machine</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+</head>
+<body class="page-admin">
+  <div class="video-bg video-bg--subtle" aria-hidden="true">
+    <div class="video-overlay"></div>
+  </div>
+
+  <main class="admin-wrap">
+    <section id="admin-login" class="admin-login glass-panel">
+      <h1>☠ Admin Panel</h1>
+      <p>Enter admin password to manage Creepy Machine</p>
+      <form id="admin-login-form">
+        <input type="password" id="admin-password" placeholder="Password" required autocomplete="current-password">
+        <button type="submit" class="btn-primary">Enter</button>
+      </form>
+      <p id="admin-login-error" class="warning" hidden></p>
+      <a href="index.html" class="back-link">← Back to site</a>
+    </section>
+
+    <section id="admin-panel" class="admin-panel" hidden>
+      <header class="admin-header">
+        <h1>Admin Panel</h1>
+        <div class="admin-header-actions">
+          <button type="button" id="admin-save" class="btn-primary">Save all</button>
+          <button type="button" id="admin-reset" class="btn-ghost">Reset defaults</button>
+          <button type="button" id="admin-logout" class="btn-ghost">Logout</button>
+        </div>
+      </header>
+      <p id="admin-status" class="admin-status"></p>
+
+      <nav class="admin-tabs">
+        <button type="button" class="admin-tab is-active" data-panel="panel-general">General</button>
+        <button type="button" class="admin-tab" data-panel="panel-content">Fandoms & Genres</button>
+        <button type="button" class="admin-tab" data-panel="panel-legal">Legal & FAQ</button>
+        <button type="button" class="admin-tab" data-panel="panel-subscription">Subscription Page</button>
+        <button type="button" class="admin-tab" data-panel="panel-payments">YooKassa</button>
+        <button type="button" class="admin-tab" data-panel="panel-auth">Google Auth</button>
+        <button type="button" class="admin-tab" data-panel="panel-ai">AI Providers</button>
+        <button type="button" class="admin-tab" data-panel="panel-api">API</button>
+        <button type="button" class="admin-tab" data-panel="panel-db">Database</button>
+      </nav>
+
+      <div id="panel-general" class="admin-panel-section is-active glass-panel">
+        <p class="hint">Admin password is verified against <code>ADMIN_PASSWORD</code> on backend login and is not edited here.</p>
+        <label>Free generations per day <input type="number" id="cfg-free-limit" min="0"></label>
+      </div>
+
+      <div id="panel-content" class="admin-panel-section glass-panel">
+        <label>Fandoms (JSON) <textarea id="cfg-fandoms" rows="12"></textarea></label>
+        <label>Genres (JSON) <textarea id="cfg-genres" rows="12"></textarea></label>
+        <label>Subscription plans (JSON) <textarea id="cfg-plans" rows="8"></textarea></label>
+      </div>
+
+      <div id="panel-legal" class="admin-panel-section glass-panel">
+        <p class="hint">These JSON documents override the Russian Privacy and Terms pages. FAQ and business details are shown on the subscription page.</p>
+        <label>Privacy policy RU (JSON) <textarea id="cfg-privacy-policy-ru" rows="14"></textarea></label>
+        <label>Terms RU (JSON) <textarea id="cfg-terms-ru" rows="14"></textarea></label>
+        <label>FAQ (JSON) <textarea id="cfg-faq" rows="10"></textarea></label>
+        <label>Business details / requisites (JSON) <textarea id="cfg-requisites" rows="8"></textarea></label>
+      </div>
+
+      <div id="panel-subscription" class="admin-panel-section glass-panel">
+        <label>Subscription page content (JSON) <textarea id="cfg-subscription-page" rows="12"></textarea></label>
+      </div>
+
+      <div id="panel-payments" class="admin-panel-section glass-panel">
+        <label>Enabled <select id="cfg-yk-enabled"><option value="0">No</option><option value="1">Yes</option></select></label>
+        <label>Shop ID <input type="text" id="cfg-yk-shop"></label>
+        <label>Secret key (stored locally — use env on server in production) <input type="password" id="cfg-yk-secret"></label>
+        <label>Return URL <input type="text" id="cfg-yk-return"></label>
+        <label>Webhook URL <input type="text" id="cfg-yk-webhook"></label>
+        <label>Create payment endpoint <input type="text" id="cfg-yk-endpoint"></label>
+      </div>
+
+      <div id="panel-auth" class="admin-panel-section glass-panel">
+        <label>Google enabled <select id="cfg-google-enabled"><option value="0">No</option><option value="1">Yes</option></select></label>
+        <label>Google Client ID (managed here, or via <code>GOOGLE_CLIENT_ID</code> in <code>.env</code>) <input type="text" id="cfg-google-client" placeholder="xxx.apps.googleusercontent.com"></label>
+        <p class="hint">Google Sign-In verifies the JWT on the server. If you fill the Client ID here, the backend will use it. For local testing, you can still use <code>TEMP_GOOGLE_AUTH_ENABLED=true</code> in <code>.env</code>; disable it before production.</p>
+      </div>
+
+      <div id="panel-ai" class="admin-panel-section glass-panel">
+        <p class="hint">Add OpenRouter or any OpenAI-compatible API. Each provider has <code>models[]</code> users can pick. Keys stay on server (DB).</p>
+        <p class="hint">Example provider: <code>baseUrl</code> = <code>https://openrouter.ai/api/v1/chat/completions</code>, <code>apiKey</code> = your key.</p>
+        <label>AI Providers (JSON) <textarea id="cfg-ai-providers" rows="18"></textarea></label>
+      </div>
+
+      <div id="panel-api" class="admin-panel-section glass-panel">
+        <p class="hint">Creepy Machine system prompt is always sent first on the server, then the user's idea.</p>
+        <label>Use mock API (frontend fallback only) <select id="cfg-use-mock"><option value="1">Yes</option><option value="0">No</option></select></label>
+        <label>Generate endpoint <input type="text" id="cfg-api-endpoint"></label>
+      </div>
+
+      <div id="panel-db" class="admin-panel-section glass-panel">
+        <p class="hint">Read-only server diagnostics for storage, encryption, and table counts.</p>
+        <button type="button" id="admin-refresh-db" class="btn-ghost">Refresh status</button>
+        <pre id="db-status" class="admin-json-status">Loading…</pre>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/catalog-ext.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n-extra.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

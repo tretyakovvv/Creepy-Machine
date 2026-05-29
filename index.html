@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Creepy Machine — AI creepypasta generator">
+  <title>Creepy Machine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Creepster&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&family=Special+Elite&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-home">
+  <div class="video-bg" aria-hidden="true">
+    <video id="bg-video" autoplay muted playsinline>
+      <source src="projects/Creepy Machine/osnova crip.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+    <div class="noise-overlay"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <header id="site-header" class="site-header"></header>
+
+  <main class="page">
+    <section class="hero section">
+      <p class="hero-eyebrow">AI Horror Writer</p>
+      <h1 class="title glitch" data-text="CREEPY MACHINE" data-i18n="hero.title">CREEPY MACHINE</h1>
+      <p class="subtitle" data-i18n="hero.subtitle">Enter your nightmare. The machine will write it.</p>
+    </section>
+
+    <section id="generator" class="generator section glass-panel">
+      <div class="section-head">
+        <h2 data-i18n="generator.label">Your idea</h2>
+        <p class="hint" data-i18n="generator.useHint">Ctrl/Cmd + Enter to generate</p>
+      </div>
+      <div class="generator-options">
+        <label class="option-field">
+          <span data-i18n="generator.modelLabel">AI Model</span>
+          <select id="model-select" class="control-select model-select">
+            <option value="">…</option>
+          </select>
+        </label>
+        <label class="option-field">
+          <span data-i18n="generator.intensityLabel">Horror intensity</span>
+          <select id="intensity-select" class="control-select">
+            <option value="medium" data-i18n="generator.intensityMedium">Balanced dread</option>
+            <option value="subtle" data-i18n="generator.intensitySubtle">Slow burn</option>
+            <option value="extreme" data-i18n="generator.intensityExtreme">Maximum terror</option>
+          </select>
+        </label>
+      </div>
+      <textarea
+        id="prompt-input"
+        class="prompt-input"
+        rows="5"
+        data-i18n="generator.placeholder"
+        data-i18n-attr="placeholder"
+        placeholder="Describe your creepypasta idea..."
+        maxlength="2000"
+      ></textarea>
+      <p id="warning" class="warning" role="alert" hidden></p>
+      <button type="button" id="generate-btn" class="btn-primary">
+        <span class="btn-glow"></span>
+        <span class="btn-text" data-i18n="generator.generate">Generate</span>
+      </button>
+    </section>
+
+    <section id="result-section" class="result-section section glass-panel" hidden aria-live="polite">
+      <div class="result-meta">
+        <h2 class="result-heading" data-i18n="generator.resultTitle">Transmission received</h2>
+        <span id="result-model-badge" class="result-model-badge" hidden></span>
+      </div>
+      <pre id="result-text" class="result-text"></pre>
+      <button type="button" id="copy-result-btn" class="btn-ghost copy-btn" data-i18n="generator.copy">Copy story</button>
+    </section>
+
+    <section id="fandoms" class="catalog section">
+      <div class="section-head section-head--center">
+        <h2 data-i18n="fandoms.title">Popular Fandoms</h2>
+        <p data-i18n="fandoms.subtitle">Tap a card to inject inspiration into your prompt</p>
+      </div>
+      <div class="catalog-carousel" data-carousel="fandoms" tabindex="0">
+        <button type="button" class="carousel-btn carousel-btn--prev" aria-label="Previous">‹</button>
+        <div class="catalog-track-wrap">
+          <div id="fandoms-grid" class="catalog-track"></div>
+        </div>
+        <button type="button" class="carousel-btn carousel-btn--next" aria-label="Next">›</button>
+        <div class="carousel-dots" id="fandoms-dots"></div>
+      </div>
+    </section>
+
+    <section id="genres" class="catalog section">
+      <div class="section-head section-head--center">
+        <h2 data-i18n="genres.title">Popular Genres</h2>
+        <p data-i18n="genres.subtitle">Choose a tone for your next nightmare</p>
+      </div>
+      <div class="catalog-carousel" data-carousel="genres" tabindex="0">
+        <button type="button" class="carousel-btn carousel-btn--prev" aria-label="Previous">‹</button>
+        <div class="catalog-track-wrap">
+          <div id="genres-grid" class="catalog-track"></div>
+        </div>
+        <button type="button" class="carousel-btn carousel-btn--next" aria-label="Next">›</button>
+        <div class="carousel-dots" id="genres-dots"></div>
+      </div>
+    </section>
+
+    <section class="cta-sub section glass-panel">
+      <h2 data-i18n="subscription.title">Unlock the Abyss</h2>
+      <p data-i18n="subscription.subtitle">More generations, priority AI, exclusive styles</p>
+      <a href="subscription.html" class="btn-primary btn-primary--link" data-i18n="subscription.subscribe">Subscribe</a>
+    </section>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/catalog-ext.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n-extra.js"></script>
+  <script src="js/models.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/payments.js"></script>
+  <script src="js/video-loop.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/carousel.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
