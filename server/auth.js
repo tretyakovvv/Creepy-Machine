@@ -1,11 +1,15 @@
 import { OAuth2Client } from "google-auth-library";
-import { randomUUID } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import {
   upsertUser,
   createSession,
   getSession,
   deleteSession,
   getSetting,
+  runTransaction,
+  getUserById,
+  getGuestUserIdByIpHash,
+  upsertGuestAccess,
 } from "./db.js";
 
 const SESSION_DAYS = 30;
@@ -71,6 +75,36 @@ export function createUserSession(userData) {
     user: session.user,
     subscription: session.user.subscription,
   };
+}
+
+export function createGuestSessionForIp(ip) {
+  const ipHash = createHash("sha256")
+    .update(`${String(ip || "")}:${process.env.SESSION_SECRET || process.env.DB_ENCRYPTION_KEY || ""}`)
+    .digest("hex");
+
+  return runTransaction(() => {
+    const existingUserId = getGuestUserIdByIpHash(ipHash);
+    if (existingUserId) {
+      const existingUser = getUserById(existingUserId);
+      if (existingUser) {
+        return createUserSession(existingUser);
+      }
+      const error = new Error("GUEST_IP_LOCKED");
+      error.status = 429;
+      throw error;
+    }
+
+    const guestId = `guest-${randomUUID()}`;
+    const session = createUserSession({
+      id: guestId,
+      email: `${guestId}@guest.local`,
+      name: "Guest",
+      picture: null,
+      provider: "guest",
+    });
+    upsertGuestAccess(ipHash, session.user.id);
+    return session;
+  });
 }
 
 export function resolveSession(token) {

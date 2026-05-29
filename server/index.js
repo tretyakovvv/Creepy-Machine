@@ -7,6 +7,7 @@ import crypto from "crypto";
 import {
   verifyGoogleCredential,
   createUserSession,
+  createGuestSessionForIp,
   destroySession,
   resolveSession,
   getConfiguredGoogleAuth,
@@ -145,20 +146,25 @@ app.post("/api/auth/google", async (req, res) => {
   }
 });
 
-app.post("/api/auth/guest", (_req, res) => {
-  const guestId = `guest-${crypto.randomUUID()}`;
-  const session = createUserSession({
-    id: guestId,
-    email: `${guestId}@guest.local`,
-    name: "Guest",
-    picture: null,
-    provider: "guest",
-  });
-  res.json({
-    token: session.token,
-    user: session.user,
-    subscription: session.subscription,
-  });
+app.post("/api/auth/guest", (req, res) => {
+  try {
+    const ip =
+      req.ip ||
+      String(req.headers["x-forwarded-for"] || "")
+        .split(",")[0]
+        .trim() ||
+      req.socket?.remoteAddress ||
+      "";
+    const session = createGuestSessionForIp(ip);
+    res.json({
+      token: session.token,
+      user: session.user,
+      subscription: session.subscription,
+    });
+  } catch (err) {
+    const status = err.status || 500;
+    res.status(status).json({ error: err.message || "GUEST_AUTH_FAILED" });
+  }
 });
 
 app.get("/api/auth/me", authOptional, (req, res) => {

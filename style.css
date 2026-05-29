@@ -1021,6 +1021,22 @@ a.btn-primary:hover,
   color: var(--blood-bright);
 }
 
+.footer-nav-link {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.footer-nav-link:hover {
+  color: var(--blood-bright);
+}
+
 .footer-legal {
   display: grid;
   gap: 0.45rem;
@@ -1041,33 +1057,6 @@ a.btn-primary:hover,
   margin-left: auto;
 }
 
-.footer-actions {
-  display: grid;
-  gap: 0.5rem;
-  justify-items: end;
-  margin-top: 0.35rem;
-}
-
-.footer-requisites-toggle {
-  appearance: none;
-  border: 1px solid rgba(212, 89, 89, 0.32);
-  background: rgba(0, 0, 0, 0.28);
-  color: var(--text-bright);
-  border-radius: 999px;
-  padding: 0.42rem 0.9rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-}
-
-.footer-requisites-toggle:hover {
-  border-color: var(--blood-bright);
-  box-shadow: 0 0 12px var(--glow);
-  transform: translateY(-1px);
-}
-
 .footer-requisites-panel {
   width: min(100%, 360px);
   padding: 0.85rem;
@@ -1077,6 +1066,8 @@ a.btn-primary:hover,
   color: var(--text-dim);
   font-size: 0.84rem;
   line-height: 1.6;
+  margin-left: auto;
+  margin-top: 0.45rem;
 }
 
 .footer-requisites-panel p {
@@ -1544,10 +1535,6 @@ a.btn-primary:hover,
 
   .footer-legal {
     text-align: center;
-  }
-
-  .footer-actions {
-    justify-items: center;
   }
 
   .footer-requisites-panel {

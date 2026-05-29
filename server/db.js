@@ -104,6 +104,13 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS guest_access (
+    ip_hash TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS usage_daily (
     user_id TEXT NOT NULL,
     date TEXT NOT NULL,
@@ -148,6 +155,7 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+  CREATE INDEX IF NOT EXISTS idx_guest_access_user ON guest_access(user_id);
   CREATE INDEX IF NOT EXISTS idx_generations_user ON generations(user_id);
   CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
 `);
@@ -222,6 +230,21 @@ export function getSession(token) {
         : { planId: null, active: false, generationsLeft: null },
     },
   };
+}
+
+export function getGuestUserIdByIpHash(ipHash) {
+  const row = db.prepare("SELECT user_id FROM guest_access WHERE ip_hash = ?").get(ipHash);
+  return row?.user_id || null;
+}
+
+export function upsertGuestAccess(ipHash, userId) {
+  db.prepare(
+    `INSERT INTO guest_access (ip_hash, user_id, updated_at)
+     VALUES (?, ?, datetime('now'))
+     ON CONFLICT(ip_hash) DO UPDATE SET
+       user_id = excluded.user_id,
+       updated_at = datetime('now')`
+  ).run(ipHash, userId);
 }
 
 export function deleteSession(token) {
@@ -414,6 +437,7 @@ export function getDatabaseStatus() {
   for (const table of [
     "users",
     "sessions",
+    "guest_access",
     "usage_daily",
     "subscriptions",
     "generations",
