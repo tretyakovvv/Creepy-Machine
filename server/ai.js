@@ -41,7 +41,7 @@ export const DEFAULT_AI_PROVIDERS = [
 const DEFAULT_OPENROUTER_MODEL = "deepseek/deepseek-v4-flash:free";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
 const OPENROUTER_FREE_MODEL_LIMIT = parseInt(process.env.OPENROUTER_FREE_MODEL_LIMIT || "40", 10);
-const MANUAL_FREE_MODEL_IDS = new Set(["openrouter/free", "deepseek/deepseek-v4-flash:free"]);
+const STABLE_FREE_MODEL_IDS = new Set(["openrouter/free", "deepseek/deepseek-v4-flash:free"]);
 
 const ENV_API_KEYS = {
   openrouter: "OPENROUTER_API_KEY",
@@ -170,10 +170,11 @@ function normalizeModel(model) {
 function isKnownFreeModel(model) {
   const id = String(model?.id || "").toLowerCase();
   return (
-    model?.autoDiscovered === true ||
-    model?.free === true ||
-    id.endsWith(":free") ||
-    MANUAL_FREE_MODEL_IDS.has(id)
+    STABLE_FREE_MODEL_IDS.has(id) &&
+    (model?.free === true ||
+      model?.autoDiscovered === true ||
+      id.endsWith(":free") ||
+      id === "openrouter/free")
   );
 }
 
@@ -218,7 +219,6 @@ export async function refreshOpenRouterFreeModels(providers = getAllAiProviders(
   const openrouter = providers.find((p) => p.id === "openrouter");
   if (!openrouter) return providers;
 
-  const freeModels = await fetchOpenRouterFreeTextModels();
   const existingModels = Array.isArray(openrouter.models) ? openrouter.models : [];
   const existingById = new Map(
     existingModels
@@ -226,17 +226,29 @@ export async function refreshOpenRouterFreeModels(providers = getAllAiProviders(
       .map((m) => [m.id, normalizeModel({ ...m, free: true })])
   );
 
-  for (const model of freeModels) {
-    const existing = existingById.get(model.id);
-    existingById.set(model.id, {
-      ...(existing || {}),
-      ...model,
-      free: true,
-      isDefault: existing?.isDefault || false,
-    });
+  openrouter.models = [...existingById.values()].filter((m) =>
+    STABLE_FREE_MODEL_IDS.has(String(m.id || "").toLowerCase())
+  );
+
+  try {
+    const freeModels = await fetchOpenRouterFreeTextModels();
+    for (const model of freeModels) {
+      if (!STABLE_FREE_MODEL_IDS.has(String(model.id || "").toLowerCase())) continue;
+      const existing = existingById.get(model.id);
+      existingById.set(model.id, {
+        ...(existing || {}),
+        ...model,
+        free: true,
+        isDefault: existing?.isDefault || false,
+      });
+    }
+  } catch (err) {
+    console.warn(`OpenRouter: could not refresh free models: ${err.message}`);
   }
 
-  openrouter.models = [...existingById.values()];
+  openrouter.models = [...existingById.values()].filter((m) =>
+    STABLE_FREE_MODEL_IDS.has(String(m.id || "").toLowerCase())
+  );
   if (!openrouter.models.some((m) => m.isDefault) && openrouter.models[0]) {
     openrouter.models[0].isDefault = true;
   }
