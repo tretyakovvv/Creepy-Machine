@@ -95,16 +95,20 @@
   async function loadForm() {
     const s = window.CMStore.getSettings();
     const remote = await loadFromServer();
+    const remoteYooKassa = remote?.yookassa || {};
 
     setVal("cfg-use-mock", s.api.useMock ? "1" : "0");
     setVal("cfg-api-endpoint", s.api.generateEndpoint);
     setVal("cfg-free-limit", s.subscription.freeGenerationsPerDay);
-    setVal("cfg-yk-enabled", s.yookassa.enabled ? "1" : "0");
-    setVal("cfg-yk-shop", s.yookassa.shopId);
-    setVal("cfg-yk-secret", s.yookassa.secretKey);
-    setVal("cfg-yk-return", s.yookassa.returnUrl);
-    setVal("cfg-yk-webhook", s.yookassa.webhookUrl);
-    setVal("cfg-yk-endpoint", s.yookassa.createPaymentEndpoint);
+    setVal("cfg-yk-enabled", (remoteYooKassa.enabled ?? s.yookassa.enabled) ? "1" : "0");
+    setVal("cfg-yk-shop", remoteYooKassa.shopId || s.yookassa.shopId);
+    setVal(
+      "cfg-yk-secret",
+      remoteYooKassa.secretKey === "[hidden]" ? s.yookassa.secretKey : remoteYooKassa.secretKey || s.yookassa.secretKey
+    );
+    setVal("cfg-yk-return", remoteYooKassa.returnUrl || s.yookassa.returnUrl);
+    setVal("cfg-yk-webhook", remoteYooKassa.webhookUrl || s.yookassa.webhookUrl);
+    setVal("cfg-yk-endpoint", remoteYooKassa.createPaymentEndpoint || s.yookassa.createPaymentEndpoint);
     const googleAuth = remote?.googleAuth || s.google || {};
     setVal("cfg-google-enabled", googleAuth.enabled ? "1" : "0");
     setVal("cfg-google-client", googleAuth.clientId || s.google.clientId);
@@ -262,6 +266,7 @@
             subscriptionPage,
             faq,
             requisites,
+            yookassa: partial.yookassa,
             googleAuth,
             privacyPolicyRu,
             termsRu,

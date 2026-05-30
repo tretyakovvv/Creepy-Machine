@@ -297,9 +297,29 @@ function getReturnUrl(req, planId) {
     .toString();
 }
 
+function getConfiguredYooKassa() {
+  const setting = getSetting("yookassa") || {};
+  const envShopId = (process.env.YOOKASSA_SHOP_ID || "").trim();
+  const envSecretKey = (process.env.YOOKASSA_SECRET_KEY || "").trim();
+  const shopId = (setting.shopId || envShopId).trim();
+  const secretKey = (setting.secretKey || envSecretKey).trim();
+  const hasCredentials = !!shopId && !!secretKey;
+  const enabled = setting.enabled ?? hasCredentials;
+
+  return {
+    enabled: !!enabled && hasCredentials,
+    shopId,
+    secretKey,
+    returnUrl: setting.returnUrl || process.env.YOOKASSA_RETURN_URL || "/subscription.html?status=success",
+    webhookUrl: setting.webhookUrl || "/api/payments/yookassa/webhook",
+    createPaymentEndpoint: setting.createPaymentEndpoint || "/api/payments/create",
+    source: setting.shopId || setting.secretKey ? "admin" : hasCredentials ? "env" : "none",
+  };
+}
+
 async function createYooKassaPayment(req, plan) {
-  const shopId = process.env.YOOKASSA_SHOP_ID;
-  const secretKey = process.env.YOOKASSA_SECRET_KEY;
+  const yookassa = getConfiguredYooKassa();
+  const { shopId, secretKey } = yookassa;
   const paymentId = crypto.randomUUID();
   const amount = getPlanPrice(plan);
   const currency = plan.currency || "RUB";
@@ -353,9 +373,9 @@ async function createYooKassaPayment(req, plan) {
 }
 
 async function fetchYooKassaPayment(paymentId) {
-  const shopId = process.env.YOOKASSA_SHOP_ID;
-  const secretKey = process.env.YOOKASSA_SECRET_KEY;
-  if (!shopId || !secretKey) {
+  const yookassa = getConfiguredYooKassa();
+  const { shopId, secretKey } = yookassa;
+  if (!yookassa.enabled) {
     throw new Error("YOOKASSA_NOT_CONFIGURED");
   }
 
@@ -391,7 +411,7 @@ app.post("/api/payments/create", authRequired, async (req, res) => {
   const plan = plans.find((p) => p.id === planId);
   if (!plan) return res.status(400).json({ error: "PLAN_NOT_FOUND" });
 
-  if (!process.env.YOOKASSA_SHOP_ID || !process.env.YOOKASSA_SECRET_KEY) {
+  if (!getConfiguredYooKassa().enabled) {
     return res.status(503).json({ error: "YOOKASSA_NOT_CONFIGURED" });
   }
 
@@ -509,6 +529,7 @@ app.post("/api/payments/activate", authRequired, (req, res) => {
 app.get("/api/admin/settings", adminRequired, (_req, res) => {
   const providers = getAllAiProviders();
   const googleAuth = getConfiguredGoogleAuth();
+  const yookassa = getConfiguredYooKassa();
   res.json({
     freeGenerationsPerDay: process.env.FREE_GENERATIONS_PER_DAY || "3",
     googleClientId: googleAuth.clientId ? "[set]" : "",
@@ -517,6 +538,15 @@ app.get("/api/admin/settings", adminRequired, (_req, res) => {
       enabled: googleAuth.enabled,
       clientId: googleAuth.clientId,
       source: googleAuth.source,
+    },
+    yookassa: {
+      enabled: yookassa.enabled,
+      shopId: yookassa.shopId,
+      secretKey: yookassa.secretKey ? "[hidden]" : "",
+      returnUrl: yookassa.returnUrl,
+      webhookUrl: yookassa.webhookUrl,
+      createPaymentEndpoint: yookassa.createPaymentEndpoint,
+      source: yookassa.source,
     },
     fandoms: getSetting("fandoms"),
     genres: getSetting("genres"),
@@ -550,6 +580,7 @@ app.put("/api/admin/settings", adminRequired, (req, res) => {
     faq,
     subscriptionPage,
     requisites,
+    yookassa,
     googleAuth,
     privacyPolicyRu,
     termsRu,
@@ -561,6 +592,19 @@ app.put("/api/admin/settings", adminRequired, (req, res) => {
   if (faq) setSetting("faq", faq);
   if (subscriptionPage) setSetting("subscription_page", subscriptionPage);
   if (requisites) setSetting("requisites", requisites);
+  if (yookassa) {
+    const current = getConfiguredYooKassa();
+    const next = {
+      ...current,
+      ...yookassa,
+      shopId: yookassa.shopId || current.shopId,
+      secretKey:
+        yookassa.secretKey && yookassa.secretKey !== "[hidden]"
+          ? yookassa.secretKey
+          : current.secretKey,
+    };
+    setSetting("yookassa", next);
+  }
   if (googleAuth) setSetting("google_auth", googleAuth);
   if (privacyPolicyRu) setSetting("privacy_policy_ru", privacyPolicyRu);
   if (termsRu) setSetting("terms_ru", termsRu);
