@@ -167,6 +167,7 @@
         <nav class="footer-nav">
           <a href="index.html">${t("nav.home")}</a>
           <a href="subscription.html">${t("nav.subscription")}</a>
+          <a href="requisites.html">${t("footer.requisites")}</a>
           <a href="privacy.html">${t("nav.privacy")}</a>
           <a href="terms.html">${t("nav.terms")}</a>
           <button type="button" class="footer-nav-link footer-nav-toggle" id="footer-requisites-toggle" aria-expanded="false" aria-controls="footer-requisites-panel">
