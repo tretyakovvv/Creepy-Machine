@@ -82,7 +82,9 @@
     el.innerHTML = `
       <div class="header-inner glass-panel">
         <a href="index.html" class="logo">
-          <span class="logo-icon">☠</span>
+          <span class="logo-icon logo-icon--image">
+            <img src="/CreepyLogo.png" alt="" width="28" height="28" loading="eager" decoding="async">
+          </span>
           <span class="logo-text">Creepy Machine</span>
         </a>
         <nav class="nav" aria-label="Main">
