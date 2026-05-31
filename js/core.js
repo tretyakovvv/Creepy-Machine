@@ -198,11 +198,16 @@
 
   async function refreshUsageBadge() {
     const badge = document.getElementById("account-usage-badge");
+    const priorityNote = document.getElementById("generator-priority-note");
     if (!badge) return;
     const session = window.CMStore.getSession();
     if (!session) {
       badge.hidden = true;
       badge.textContent = "";
+      if (priorityNote) {
+        priorityNote.hidden = true;
+        priorityNote.textContent = "";
+      }
       return;
     }
 
@@ -215,14 +220,29 @@
         const left = data.subscription.generationsLeft;
         badge.textContent =
           left == null ? t("account.usageUnlimited") : t("account.usagePaid", { n: left });
+        if (priorityNote) {
+          priorityNote.hidden = true;
+          priorityNote.textContent = "";
+        }
       } else {
         const remaining = Math.max(0, (data.limit ?? 0) - (data.count ?? 0));
-        badge.textContent = t("account.usageFree", { n: remaining, limit: data.limit ?? 0 });
+        badge.textContent = t("account.usageFreeLowPriority", {
+          n: remaining,
+          limit: data.limit ?? 0,
+        });
+        if (priorityNote) {
+          priorityNote.textContent = t("generator.lowPriorityNote");
+          priorityNote.hidden = false;
+        }
       }
       badge.hidden = false;
     } catch {
       badge.hidden = true;
       badge.textContent = "";
+      if (priorityNote) {
+        priorityNote.hidden = true;
+        priorityNote.textContent = "";
+      }
     }
   }
 

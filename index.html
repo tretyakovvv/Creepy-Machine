@@ -3,8 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Creepy Machine — AI creepypasta generator">
-  <title>Creepy Machine</title>
+  <meta name="description" content="Creepy Machine is an AI creepypasta generator and horror story writer for English and Russian prompts. Generate dark stories, horror ideas, and creepy scenarios online.">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <link rel="canonical" href="https://creepymachine.ru/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Creepy Machine">
+  <meta property="og:title" content="Creepy Machine — AI creepypasta generator and horror story writer">
+  <meta property="og:description" content="Generate creepypastas, horror stories, and dark prompts online with Creepy Machine.">
+  <meta property="og:url" content="https://creepymachine.ru/">
+  <meta property="og:image" content="https://creepymachine.ru/CreepyLogo.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Creepy Machine — AI creepypasta generator and horror story writer">
+  <meta name="twitter:description" content="Generate creepypastas, horror stories, and dark prompts online with Creepy Machine.">
+  <meta name="twitter:image" content="https://creepymachine.ru/CreepyLogo.png">
+  <title>Creepy Machine — AI creepypasta generator and horror story writer</title>
   <link rel="icon" type="image/png" href="/CreepyLogo.png">
   <link rel="apple-touch-icon" href="/CreepyLogo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,7 +40,7 @@
     <section class="hero section">
       <p class="hero-eyebrow">AI Horror Writer</p>
       <h1 class="title glitch" data-text="CREEPY MACHINE" data-i18n="hero.title">CREEPY MACHINE</h1>
-      <p class="subtitle" data-i18n="hero.subtitle">Enter your nightmare. The machine will write it.</p>
+      <p class="subtitle" data-i18n="hero.subtitle">Enter your nightmare. The machine writes AI creepypasta, horror stories, and dark prompts.</p>
     </section>
 
     <section id="generator" class="generator section glass-panel">
@@ -66,6 +78,7 @@
         <span class="btn-glow"></span>
         <span class="btn-text" data-i18n="generator.generate">Generate</span>
       </button>
+      <p id="generator-priority-note" class="generator-priority-note" data-i18n="generator.lowPriorityNote" hidden></p>
     </section>
 
     <section id="result-section" class="result-section section glass-panel" hidden aria-live="polite">
@@ -109,7 +122,7 @@
 
     <section class="cta-sub section glass-panel">
       <h2 data-i18n="subscription.title">Unlock the Abyss</h2>
-      <p data-i18n="subscription.subtitle">More generations, priority AI, exclusive styles</p>
+      <p data-i18n="subscription.subtitle">More generations, priority service, exclusive styles</p>
       <a href="subscription.html" class="btn-primary btn-primary--link" data-i18n="subscription.subscribe">Subscribe</a>
     </section>
   </main>

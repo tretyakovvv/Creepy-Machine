@@ -651,6 +651,18 @@ code {
   display: none;
 }
 
+.generator-priority-note {
+  margin-top: 0.65rem;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.generator-priority-note[hidden] {
+  display: none;
+}
+
 /* —— Buttons —— */
 .btn-primary {
   position: relative;

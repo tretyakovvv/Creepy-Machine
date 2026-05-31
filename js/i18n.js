@@ -1,7 +1,7 @@
 (function () {
   const translations = {
     en: {
-      meta: { title: "Creepy Machine — AI Creepypasta Generator" },
+      meta: { title: "Creepy Machine — AI creepypasta generator and horror story writer" },
       nav: {
         home: "Home",
         fandoms: "Fandoms",
@@ -29,12 +29,13 @@
       },
       account: {
         usageFree: "{n} free generations left today",
+        usageFreeLowPriority: "Low priority · {n} free generations left today",
         usagePaid: "{n} paid generations left",
         usageUnlimited: "Unlimited generations",
       },
       hero: {
         title: "CREEPY MACHINE",
-        subtitle: "Enter your nightmare. The machine will write it.",
+        subtitle: "Enter your nightmare. The machine writes AI creepypasta, horror stories, and dark prompts.",
       },
       generator: {
         label: "Your idea",
@@ -53,6 +54,7 @@
         intensityExtreme: "Maximum terror",
         copy: "Copy story",
         copied: "Copied!",
+        lowPriorityNote: "Free users are placed in the low-priority queue.",
       },
       fandoms: {
         title: "Popular Fandoms",
@@ -64,7 +66,7 @@
       },
       subscription: {
         title: "Unlock the Abyss",
-        subtitle: "More generations, priority AI, exclusive styles",
+        subtitle: "More generations, priority service, exclusive styles",
         free: "Free",
         perMonth: "/ month",
         generations: "{n} generations / month",
@@ -101,7 +103,7 @@
       },
     },
     ru: {
-      meta: { title: "Creepy Machine — генератор крипипаст на ИИ" },
+      meta: { title: "Creepy Machine — генератор крипипаст и хоррор-историй на ИИ" },
       nav: {
         home: "Главная",
         fandoms: "Фандомы",
@@ -129,12 +131,13 @@
       },
       account: {
         usageFree: "Сегодня осталось {n} бесплатных генераций",
+        usageFreeLowPriority: "Низкий приоритет · сегодня осталось {n} бесплатных генераций",
         usagePaid: "Осталось платных генераций: {n}",
         usageUnlimited: "Безлимитные генерации",
       },
       hero: {
         title: "CREEPY MACHINE",
-        subtitle: "Введи свой кошмар. Машина напишет его за тебя.",
+        subtitle: "Введи свой кошмар. Машина пишет крипипасты, хоррор-истории и мрачные промты.",
       },
       generator: {
         label: "Твоя идея",
@@ -153,6 +156,7 @@
         intensityExtreme: "Максимальный террор",
         copy: "Копировать",
         copied: "Скопировано!",
+        lowPriorityNote: "Бесплатные пользователи идут в низкоприоритетную очередь.",
       },
       fandoms: {
         title: "Популярные фандомы",
@@ -164,7 +168,7 @@
       },
       subscription: {
         title: "Открой бездну",
-        subtitle: "Больше генераций, приоритетный ИИ, эксклюзивные стили",
+        subtitle: "Больше генераций, приоритетное обслуживание, эксклюзивные стили",
         free: "Бесплатно",
         perMonth: "/ мес",
         generations: "{n} генераций / месяц",
