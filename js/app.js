@@ -44,13 +44,13 @@
     const pub = window.CM_PUBLIC_CONFIG || {};
     const useMock = settings.api.useMock && pub.useMock !== false;
 
-    if (useMock && !pub.openrouterConfigured) {
+    if (useMock && !(pub.aiConfigured ?? pub.openrouterConfigured)) {
       await new Promise((r) => setTimeout(r, 1400));
       return {
         text:
-          `[MOCK — set OPENROUTER_API_KEY in .env]\n\n` +
+          `[MOCK — set an AI API key in .env]\n\n` +
           `Subject: ${prompt}\n\n` +
-          `The machine whispered your idea back as a story. Connect the server to OpenRouter for real generations.`,
+          `The machine whispered your idea back as a story. Connect the server to a real AI provider for live generations.`,
       };
     }
 
@@ -101,7 +101,7 @@
   function warningForReason(reason) {
     const t = window.CMI18n.t;
     if (reason === "AUTH_REQUIRED") return t("auth.required");
-    if (reason === "DAILY_LIMIT" || reason === "SUBSCRIPTION_LIMIT") {
+    if (reason === "DAILY_LIMIT" || reason === "SUBSCRIPTION_LIMIT" || reason === "SUBSCRIPTION_REQUIRED") {
       return t("generator.subscriptionRequired");
     }
     return t("generator.warningError");
@@ -207,7 +207,7 @@
       window.CMCore?.refreshUsageBadge?.();
     } catch (err) {
       console.error(err);
-      showWarning(err.message || warningForReason(err.code) || t("generator.warningError"));
+      showWarning(warningForReason(err.code) || err.message || t("generator.warningError"));
       const section = getEl("result-section");
       if (section) {
         section.hidden = true;

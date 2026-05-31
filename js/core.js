@@ -452,7 +452,12 @@
       window.CMAuth.initGoogleAuth();
     });
 
-    window.addEventListener("cm:session-changed", () => renderHeader());
+    window.addEventListener("cm:session-changed", () => {
+      renderHeader();
+      if (window.CM_PUBLIC_CONFIG?.models) {
+        window.CMModels?.populateModelSelect(window.CM_PUBLIC_CONFIG.models);
+      }
+    });
   }
 
   window.CMCore = {

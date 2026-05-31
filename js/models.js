@@ -18,25 +18,37 @@
     if (!sel || !models?.length) return;
 
     const saved = getSelectedModel();
+    const subscriptionActive = !!window.CMStore.getSubscription?.()?.active;
     let picked = false;
     sel.innerHTML = models
       .map((m) => {
         const val = JSON.stringify({ modelId: m.id, providerId: m.providerId });
         const isSaved = saved?.modelId === m.id && saved?.providerId === m.providerId;
-        const isDefault = !saved && m.isDefault;
-        const selected = !picked && (isSaved || isDefault) ? ((picked = true), " selected") : "";
-        return `<option value="${escapeAttr(val)}"${selected}>${escapeHtml(m.providerName)} — ${escapeHtml(m.name)}</option>`;
+        const requiresSubscription = !!m.requiresSubscription;
+        const accessible = !requiresSubscription || subscriptionActive;
+        const isDefault = !saved && m.isDefault && accessible;
+        const selected = !picked && accessible && (isSaved || isDefault) ? ((picked = true), " selected") : "";
+        const disabled = accessible ? "" : " disabled";
+        const lockLabel = requiresSubscription && !subscriptionActive
+          ? ` · ${escapeHtml(window.CMI18n?.t?.("subscription.premiumOnly") || "Subscription only")}`
+          : "";
+        return `<option value="${escapeAttr(val)}"${selected}${disabled}>${escapeHtml(m.providerName)} — ${escapeHtml(m.name)}${lockLabel}</option>`;
       })
       .join("");
 
-    sel.addEventListener("change", () => {
+    if (!picked) {
+      const firstAvailable = sel.querySelector("option:not([disabled])");
+      if (firstAvailable) firstAvailable.selected = true;
+    }
+
+    sel.onchange = () => {
       try {
         const v = JSON.parse(sel.value);
         setSelectedModel(v.modelId, v.providerId);
       } catch {
         /* ignore */
       }
-    });
+    };
   }
 
   function getSelectionFromUI() {

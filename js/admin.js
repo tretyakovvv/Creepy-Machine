@@ -170,7 +170,7 @@
               `
             )
             .join("")
-        : `<li class="admin-top-pages-empty">No free models found</li>`;
+        : `<li class="admin-top-pages-empty">No models found</li>`;
     } catch (err) {
       list.innerHTML = `<li class="admin-top-pages-empty">Failed to check models: ${escapeHtml(err.message)}</li>`;
     }
@@ -251,6 +251,23 @@
             name: "Free Models Router",
             enabled: true,
             isDefault: true,
+          },
+        ],
+      },
+      {
+        id: "polza",
+        name: "Polza AI",
+        type: "openai_chat",
+        baseUrl: "https://polza.ai/api/v1/chat/completions",
+        apiKey: "",
+        enabled: true,
+        models: [
+          {
+            id: "deepseek/deepseek-v4-flash",
+            name: "DeepSeek V4 Flash",
+            enabled: true,
+            requiresSubscription: true,
+            priceHint: "12.69 ₽ / 1M input tokens",
           },
         ],
       },

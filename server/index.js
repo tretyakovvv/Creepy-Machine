@@ -97,6 +97,7 @@ app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
     openrouter: !!process.env.OPENROUTER_API_KEY,
+    polza: !!process.env.POLZA_API_KEY,
     deepseek: !!process.env.DEEPSEEK_API_KEY,
     google: !!googleAuth.clientId,
   });
@@ -105,16 +106,19 @@ app.get("/api/health", (_req, res) => {
 app.get("/api/config/public", (_req, res) => {
   const providers = getAiProviders();
   const hasKey = providers.some((p) => p.apiKey);
-  const hasEnvKey = !!process.env.OPENROUTER_API_KEY || !!process.env.DEEPSEEK_API_KEY;
+  const hasEnvKey =
+    !!process.env.OPENROUTER_API_KEY || !!process.env.POLZA_API_KEY || !!process.env.DEEPSEEK_API_KEY;
   const tempGoogleAuthEnabled = process.env.TEMP_GOOGLE_AUTH_ENABLED === "true";
   const googleAuth = getConfiguredGoogleAuth();
+  const aiConfigured = hasKey || hasEnvKey;
   res.json({
     googleClientId: googleAuth.clientId,
     googleEnabled: googleAuth.enabled && !tempGoogleAuthEnabled,
     tempGoogleAuthEnabled,
-    useMock: !hasKey && !hasEnvKey,
+    useMock: !aiConfigured,
     freeGenerationsPerDay: parseInt(process.env.FREE_GENERATIONS_PER_DAY || "3", 10),
-    openrouterConfigured: hasKey || hasEnvKey,
+    openrouterConfigured: !!process.env.OPENROUTER_API_KEY || providers.some((p) => p.id === "openrouter" && p.apiKey),
+    aiConfigured,
     devAuthEnabled:
       tempGoogleAuthEnabled ||
       (process.env.DEV_AUTH_ENABLED === "true" && !googleAuth.clientId),
@@ -239,6 +243,7 @@ app.post("/api/generate", authRequired, async (req, res) => {
     if (
       !providers.some((p) => p.apiKey) &&
       !process.env.OPENROUTER_API_KEY &&
+      !process.env.POLZA_API_KEY &&
       !process.env.DEEPSEEK_API_KEY
     ) {
       return res.status(503).json({ error: "AI_NOT_CONFIGURED" });
@@ -248,6 +253,7 @@ app.post("/api/generate", authRequired, async (req, res) => {
       modelId,
       providerId,
       intensity,
+      user: req.user,
     });
     const { text, model, modelName, providerName } = result;
 
@@ -276,6 +282,8 @@ app.post("/api/generate", authRequired, async (req, res) => {
     const status =
       err.message === "API_KEY_NOT_CONFIGURED"
         ? 503
+        : err.code === "SUBSCRIPTION_REQUIRED"
+          ? 403
         : err.code === "AI_PROVIDER_ERROR"
           ? 502
           : 500;
@@ -631,7 +639,7 @@ app.get("/api/admin/model-health", adminRequired, async (_req, res) => {
       })
     );
     res.json({
-      provider: "openrouter",
+      provider: "all",
       models: healthChecks,
       liveCount: healthChecks.filter((model) => model.available).length,
       unavailable: healthChecks.filter((model) => !model.available).map((m) => m.id),

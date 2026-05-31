@@ -66,7 +66,7 @@
       },
       subscription: {
         title: "Unlock the Abyss",
-        subtitle: "More generations, priority service, exclusive styles",
+        subtitle: "More generations, priority service, and a smarter AI model for subscribers",
         free: "Free",
         perMonth: "/ month",
         generations: "{n} generations / month",
@@ -74,6 +74,7 @@
         googleRequired: "Sign in with Google to subscribe",
         currentPlan: "Your plan",
         popular: "Popular",
+        premiumOnly: "Subscription only",
         paymentNote: "Secure payment via YooKassa",
         success: "Payment successful. Welcome to the abyss.",
         pending: "Payment pending...",
@@ -168,7 +169,7 @@
       },
       subscription: {
         title: "Открой бездну",
-        subtitle: "Больше генераций, приоритетное обслуживание, эксклюзивные стили",
+        subtitle: "Больше генераций, приоритетное обслуживание и более умная модель ИИ для подписчиков",
         free: "Бесплатно",
         perMonth: "/ мес",
         generations: "{n} генераций / месяц",
@@ -176,6 +177,7 @@
         googleRequired: "Войдите через Google, чтобы купить подписку",
         currentPlan: "Ваш план",
         popular: "Популярный",
+        premiumOnly: "Только по подписке",
         paymentNote: "Безопасная оплата через ЮKassa",
         success: "Оплата прошла. Добро пожаловать в бездну.",
         pending: "Ожидание оплаты...",

@@ -19,6 +19,23 @@ export const DEFAULT_AI_PROVIDERS = [
     ],
   },
   {
+    id: "polza",
+    name: "Polza AI",
+    type: "openai_chat",
+    baseUrl: "https://polza.ai/api/v1/chat/completions",
+    apiKey: "",
+    enabled: true,
+    models: [
+      {
+        id: "deepseek/deepseek-v4-flash",
+        name: "DeepSeek V4 Flash",
+        enabled: true,
+        requiresSubscription: true,
+        priceHint: "12.69 ₽ / 1M input tokens",
+      },
+    ],
+  },
+  {
     id: "deepseek",
     name: "DeepSeek",
     type: "openai_chat",
@@ -45,6 +62,7 @@ const STABLE_FREE_MODEL_IDS = new Set([
 
 const ENV_API_KEYS = {
   openrouter: "OPENROUTER_API_KEY",
+  polza: "POLZA_API_KEY",
   deepseek: "DEEPSEEK_API_KEY",
 };
 
@@ -225,6 +243,57 @@ export async function probeModelAvailability(providerId, modelId) {
   }
 }
 
+function collectAccessibleCandidates(providerId, modelId, user) {
+  const providers = getAiProviders();
+  if (!providers.length) throw new Error("NO_AI_PROVIDERS");
+
+  const candidates = [];
+  for (const provider of providers) {
+    for (const model of provider.models || []) {
+      if (!isModelAccessible(model, user)) continue;
+      candidates.push({ provider, model });
+    }
+  }
+
+  if (!candidates.length) {
+    const hasPremium = providers.some((provider) =>
+      (provider.models || []).some((model) => model.requiresSubscription === true && model.enabled !== false)
+    );
+    const err = new Error(hasPremium && !user?.subscription?.active ? "SUBSCRIPTION_REQUIRED" : "NO_MODELS");
+    err.code = hasPremium && !user?.subscription?.active ? "SUBSCRIPTION_REQUIRED" : "NO_MODELS";
+    err.status = hasPremium && !user?.subscription?.active ? 403 : 404;
+    throw err;
+  }
+
+  const preferredProvider = providers.find((p) => p.id === providerId) || candidates[0].provider;
+  const preferredModel =
+    (preferredProvider.models || []).find((m) => m.id === modelId && isModelAccessible(m, user)) ||
+    (preferredProvider.models || []).find((m) => m.isDefault && isModelAccessible(m, user)) ||
+    (preferredProvider.models || []).find((m) => isModelAccessible(m, user));
+
+  if (!preferredModel) {
+    const err = new Error("SUBSCRIPTION_REQUIRED");
+    err.code = "SUBSCRIPTION_REQUIRED";
+    err.status = 403;
+    throw err;
+  }
+
+  const ordered = [
+    { provider: preferredProvider, model: preferredModel },
+    ...candidates.filter(
+      (entry) => entry.provider.id !== preferredProvider.id || entry.model.id !== preferredModel.id
+    ),
+  ];
+
+  const seen = new Set();
+  return ordered.filter((entry) => {
+    const key = `${entry.provider.id}:${entry.model.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function normalizeModel(model) {
   return {
     ...model,
@@ -241,6 +310,16 @@ function isKnownFreeModel(model) {
       id.endsWith(":free") ||
       id === "openrouter/free")
   );
+}
+
+function isPublicSelectableModel(model) {
+  return model?.enabled !== false && (isKnownFreeModel(model) || model?.requiresSubscription === true);
+}
+
+function isModelAccessible(model, user) {
+  if (!isPublicSelectableModel(model)) return false;
+  if (!model.requiresSubscription) return true;
+  return !!user?.subscription?.active;
 }
 
 function sortFreeOpenRouterModels(a, b) {
@@ -331,8 +410,7 @@ export function getPublicModels() {
 
   for (const p of providers) {
     for (const m of p.models || []) {
-      if (m.enabled === false) continue;
-      if (!isKnownFreeModel(m)) continue;
+      if (!isPublicSelectableModel(m)) continue;
       const cleanModel = normalizeModel(m);
       models.push({
         id: cleanModel.id,
@@ -340,6 +418,8 @@ export function getPublicModels() {
         providerId: p.id,
         providerName: p.name,
         isDefault: !!cleanModel.isDefault,
+        requiresSubscription: !!cleanModel.requiresSubscription,
+        priceHint: cleanModel.priceHint || "",
       });
     }
   }
@@ -348,20 +428,9 @@ export function getPublicModels() {
   return models;
 }
 
-function resolveProviderAndModel(providerId, modelId) {
-  const providers = getAiProviders();
-  if (!providers.length) throw new Error("NO_AI_PROVIDERS");
-
-  let provider = providers.find((p) => p.id === providerId) || providers[0];
-  const models = (provider.models || []).filter((m) => m.enabled !== false && isKnownFreeModel(m));
-  if (!models.length) throw new Error("NO_MODELS");
-
-  let model =
-    models.find((m) => m.id === modelId) ||
-    models.find((m) => m.isDefault) ||
-    models[0];
-
-  return { provider, model };
+function resolveProviderAndModel(providerId, modelId, user) {
+  const candidates = collectAccessibleCandidates(providerId, modelId, user);
+  return candidates[0];
 }
 
 function getProviderApiKey(provider) {
@@ -396,7 +465,7 @@ async function parseProviderError(response) {
 
 function buildProviderErrorMessage(provider, model, status, errText) {
   if (status === 404) {
-    return `Model unavailable: ${model.id}. OpenRouter no longer serves this model.`;
+    return `Model unavailable: ${model.id}. The provider no longer serves this model.`;
   }
   if (status === 429 && provider.id === "openrouter") {
     return `OpenRouter rate limit or free model capacity reached for ${model.id}. Try another free model, or wait and retry.`;
@@ -408,7 +477,7 @@ function isRetriableProviderError(status) {
   return [404, 429, 500, 502, 503, 504].includes(Number(status));
 }
 
-async function requestGeneration({ baseUrl, headers, modelId, userContent, intensity }) {
+async function requestGeneration({ baseUrl, headers, modelId, userContent, intensity, user }) {
   const response = await fetch(baseUrl, {
     method: "POST",
     headers,
@@ -420,6 +489,7 @@ async function requestGeneration({ baseUrl, headers, modelId, userContent, inten
       ],
       temperature: intensity === "subtle" ? 0.75 : intensity === "extreme" ? 0.95 : 0.85,
       max_tokens: 2048,
+      ...(user ? { user } : {}),
     }),
   });
 
@@ -437,16 +507,7 @@ async function requestGeneration({ baseUrl, headers, modelId, userContent, inten
   return text;
 }
 
-export async function generateWithAi(prompt, lang, { providerId, modelId, intensity } = {}) {
-  const { provider, model } = resolveProviderAndModel(providerId, modelId);
-  const apiKey = getProviderApiKey(provider);
-
-  if (!apiKey) throw new Error("API_KEY_NOT_CONFIGURED");
-
-  const baseUrl = normalizeChatCompletionsUrl(
-    provider.baseUrl || "https://openrouter.ai/api/v1/chat/completions"
-  );
-
+export async function generateWithAi(prompt, lang, { providerId, modelId, intensity, user } = {}) {
   let userContent = buildUserMessage(prompt, lang);
   if (intensity === "extreme") {
     userContent += "\n\n[Intensity: maximum horror, visceral dread, deeply unsettling.]";
@@ -454,55 +515,61 @@ export async function generateWithAi(prompt, lang, { providerId, modelId, intens
     userContent += "\n\n[Intensity: slow-burn, subtle dread, ambiguous horror.]";
   }
 
-  const headers = {
-    Authorization: `Bearer ${apiKey}`,
-    "Content-Type": "application/json",
-  };
-
-  if (provider.id === "openrouter" || baseUrl.includes("openrouter")) {
-    const siteUrl = process.env.SITE_URL;
-    if (siteUrl && !isLocalSiteUrl(siteUrl)) {
-      headers["HTTP-Referer"] = siteUrl;
-    }
-    headers["X-Title"] = "Creepy Machine";
-  }
-
-  const providerModels = (provider.models || []).filter(
-    (m) => m.enabled !== false && isKnownFreeModel(m)
-  );
-  const fallbackModels = providerModels.filter((m) => m.id !== model.id);
-  const tryModels = [model, ...fallbackModels];
+  const tryModels = collectAccessibleCandidates(providerId, modelId, user);
 
   let text = "";
-  let usedModel = model;
+  let usedProvider = tryModels[0].provider;
+  let usedModel = tryModels[0].model;
   let lastErr = null;
 
   for (const candidate of tryModels) {
     try {
+      const apiKey = getProviderApiKey(candidate.provider);
+      if (!apiKey) throw new Error("API_KEY_NOT_CONFIGURED");
+
+      const baseUrl = normalizeChatCompletionsUrl(
+        candidate.provider.baseUrl || "https://openrouter.ai/api/v1/chat/completions"
+      );
+
+      const headers = {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      };
+
+      if (candidate.provider.id === "openrouter" || baseUrl.includes("openrouter")) {
+        const siteUrl = process.env.SITE_URL;
+        if (siteUrl && !isLocalSiteUrl(siteUrl)) {
+          headers["HTTP-Referer"] = siteUrl;
+        }
+        headers["X-Title"] = "Creepy Machine";
+      }
+
       text = await requestGeneration({
         baseUrl,
         headers,
-        modelId: candidate.id,
+        modelId: candidate.model.id,
         userContent,
         intensity,
+        user: user?.id || null,
       });
-      usedModel = candidate;
+      usedProvider = candidate.provider;
+      usedModel = candidate.model;
       break;
     } catch (err) {
       lastErr = err;
       const status = Number(err?.status || 0);
-      const canTryNext = isRetriableProviderError(status) && candidate.id !== tryModels.at(-1)?.id;
-      console.error("AI provider error:", provider.id, candidate.id, status || "n/a", err.message);
+      const canTryNext = isRetriableProviderError(status) && candidate !== tryModels.at(-1);
+      console.error("AI provider error:", candidate.provider.id, candidate.model.id, status || "n/a", err.message);
       if (!canTryNext) {
-        const message = buildProviderErrorMessage(provider, candidate, status, err.message);
+        const message = buildProviderErrorMessage(candidate.provider, candidate.model, status, err.message);
         const finalErr = new Error(message);
         finalErr.code = "AI_PROVIDER_ERROR";
         finalErr.status = status || 502;
-        finalErr.providerId = provider.id;
-        finalErr.model = candidate.id;
+        finalErr.providerId = candidate.provider.id;
+        finalErr.model = candidate.model.id;
         throw finalErr;
       }
-      console.warn(`AI fallback: retrying after ${candidate.id} returned ${status}`);
+      console.warn(`AI fallback: retrying after ${candidate.model.id} returned ${status}`);
     }
   }
 
@@ -512,7 +579,7 @@ export async function generateWithAi(prompt, lang, { providerId, modelId, intens
     text,
     model: usedModel.id,
     modelName: usedModel.name,
-    providerId: provider.id,
-    providerName: provider.name,
+    providerId: usedProvider.id,
+    providerName: usedProvider.name,
   };
 }
