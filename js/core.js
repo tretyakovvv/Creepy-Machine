@@ -172,28 +172,16 @@
           <a href="requisites.html">${t("footer.requisites")}</a>
           <a href="privacy.html">${t("nav.privacy")}</a>
           <a href="terms.html">${t("nav.terms")}</a>
-          <button type="button" class="footer-nav-link footer-nav-toggle" id="footer-requisites-toggle" aria-expanded="false" aria-controls="footer-requisites-panel">
-            ${t("footer.requisites")}
-          </button>
         </nav>
         <div class="footer-legal">
           <p class="footer-copy">${t("footer.copyright", { year })}</p>
           <p class="footer-ai">${t("footer.ai")}</p>
-          <div class="footer-requisites-panel" id="footer-requisites-panel" hidden>
+          <div class="footer-requisites-panel">
             ${requisitesHtml || `<p>${t("footer.requisitesEmpty")}</p>`}
           </div>
         </div>
       </div>
     `;
-
-    const toggle = document.getElementById("footer-requisites-toggle");
-    const panel = document.getElementById("footer-requisites-panel");
-    toggle?.addEventListener("click", () => {
-      if (!panel) return;
-      const willOpen = panel.hidden;
-      panel.hidden = !willOpen;
-      toggle.setAttribute("aria-expanded", String(willOpen));
-    });
   }
 
   async function refreshUsageBadge() {
