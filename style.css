@@ -1139,28 +1139,6 @@ a.btn-primary:hover,
   margin-left: auto;
 }
 
-.footer-requisites-panel {
-  width: min(100%, 360px);
-  padding: 0.85rem;
-  border: 1px solid var(--surface-border);
-  border-radius: var(--radius-sm);
-  background: rgba(0, 0, 0, 0.34);
-  color: var(--text-dim);
-  font-size: 0.84rem;
-  line-height: 1.6;
-  margin-left: auto;
-  margin-top: 0.45rem;
-}
-
-.footer-requisites-panel p {
-  margin-bottom: 0.35rem;
-}
-
-.footer-requisites-title {
-  color: var(--text-bright);
-  font-weight: 600;
-}
-
 .account-usage-badge {
   display: inline-flex;
   align-items: center;
@@ -1617,10 +1595,6 @@ a.btn-primary:hover,
 
   .footer-legal {
     text-align: center;
-  }
-
-  .footer-requisites-panel {
-    width: 100%;
   }
 
 }

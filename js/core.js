@@ -131,34 +131,7 @@
     const el = document.getElementById("site-footer");
     if (!el) return;
     const t = window.CMI18n.t;
-    const settings = window.CMStore.getSettings();
-    const lang = window.CMStore.getLang();
     const year = new Date().getFullYear();
-    const requisites = settings.requisites || {};
-
-    const title =
-      requisites?.title && typeof requisites.title === "object"
-        ? window.CMCore.localize(requisites, "title")
-        : typeof requisites?.title === "string"
-          ? requisites.title
-          : "";
-
-    const lines = Array.isArray(requisites?.lines)
-      ? requisites.lines
-          .map((line) =>
-            typeof line === "string"
-              ? line
-              : line?.[lang] || line?.ru || line?.en || line?.text || ""
-          )
-          .filter(Boolean)
-      : [];
-
-    const requisitesHtml = [
-      title ? `<p class="footer-requisites-title">${escapeHtml(title)}</p>` : "",
-      ...lines.map((line) => `<p>${escapeHtml(line)}</p>`),
-    ]
-      .filter(Boolean)
-      .join("");
 
     el.innerHTML = `
       <div class="footer-inner glass-panel">
@@ -176,9 +149,6 @@
         <div class="footer-legal">
           <p class="footer-copy">${t("footer.copyright", { year })}</p>
           <p class="footer-ai">${t("footer.ai")}</p>
-          <div class="footer-requisites-panel">
-            ${requisitesHtml || `<p>${t("footer.requisitesEmpty")}</p>`}
-          </div>
         </div>
       </div>
     `;
