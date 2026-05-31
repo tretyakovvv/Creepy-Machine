@@ -80,21 +80,16 @@
     if (status === "success") {
       try {
         const pending = getPendingPayment();
-        let confirmed = null;
         if (!pending?.paymentId) {
-          const session = await window.CMAuth.restoreSession();
-          return {
-            success: !!session?.subscription?.active,
-            pending: !session?.subscription?.active,
-            planId: session?.subscription?.planId || null,
-          };
+          await window.CMAuth.restoreSession();
+          return { success: false, pending: false };
         }
-        confirmed = await confirmPayment(pending.paymentId);
-        const session = await window.CMAuth.restoreSession();
-        const isActive = !!session?.subscription?.active || (confirmed.status === "succeeded" && !!confirmed.paid);
+
+        const confirmed = await confirmPayment(pending.paymentId);
+        const activated = confirmed.status === "succeeded" && !!confirmed.paid;
         return {
-          success: isActive,
-          pending: !isActive,
+          success: activated,
+          pending: !activated && confirmed.status === "pending",
           status: confirmed.status,
           planId: pending.planId,
         };

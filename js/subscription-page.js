@@ -142,6 +142,10 @@
       el.textContent = t("subscription.pending");
       el.classList.remove("is-success");
       el.hidden = false;
+    } else {
+      el.hidden = true;
+      el.textContent = "";
+      el.classList.remove("is-success");
     }
   }
 
