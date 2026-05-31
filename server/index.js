@@ -692,7 +692,7 @@ async function bootstrapAiProviders() {
 
   if (or) {
     const defaultOpenRouterModel =
-      process.env.OPENROUTER_MODEL || "deepseek/deepseek-v4-flash:free";
+      process.env.OPENROUTER_MODEL || "openrouter/free";
     const hasDefault = or.models?.some((m) => m.id === defaultOpenRouterModel);
     if (!hasDefault) {
       or.models = [

@@ -208,12 +208,13 @@
         enabled: true,
         models: [
           {
-            id: "deepseek/deepseek-v4-flash:free",
-            name: "DeepSeek V4 Flash",
+            id: "openrouter/free",
+            name: "Free Models Router",
             enabled: true,
             isDefault: true,
           },
-          { id: "openrouter/free", name: "OpenRouter Router", enabled: true },
+          { id: "openai/gpt-oss-20b:free", name: "OpenAI GPT-OSS 20B", enabled: true },
+          { id: "meta-llama/llama-3.2-3b-instruct:free", name: "Llama 3.2 3B Instruct", enabled: true },
         ],
       },
       {

@@ -11,12 +11,13 @@ export const DEFAULT_AI_PROVIDERS = [
     enabled: true,
     models: [
       {
-        id: "deepseek/deepseek-v4-flash:free",
-        name: "DeepSeek V4 Flash",
+        id: "openrouter/free",
+        name: "Free Models Router",
         enabled: true,
         isDefault: true,
       },
-      { id: "openrouter/free", name: "OpenRouter Router", enabled: true },
+      { id: "openai/gpt-oss-20b:free", name: "OpenAI GPT-OSS 20B", enabled: true },
+      { id: "meta-llama/llama-3.2-3b-instruct:free", name: "Llama 3.2 3B Instruct", enabled: true },
     ],
   },
   {
@@ -38,10 +39,13 @@ export const DEFAULT_AI_PROVIDERS = [
   },
 ];
 
-const DEFAULT_OPENROUTER_MODEL = "deepseek/deepseek-v4-flash:free";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
 const OPENROUTER_FREE_MODEL_LIMIT = parseInt(process.env.OPENROUTER_FREE_MODEL_LIMIT || "40", 10);
-const STABLE_FREE_MODEL_IDS = new Set(["openrouter/free", "deepseek/deepseek-v4-flash:free"]);
+const STABLE_FREE_MODEL_IDS = new Set([
+  "openrouter/free",
+  "openai/gpt-oss-20b:free",
+  "meta-llama/llama-3.2-3b-instruct:free",
+]);
 
 const ENV_API_KEYS = {
   openrouter: "OPENROUTER_API_KEY",
@@ -326,6 +330,9 @@ async function parseProviderError(response) {
 }
 
 function buildProviderErrorMessage(provider, model, status, errText) {
+  if (status === 404) {
+    return `Model unavailable: ${model.id}. OpenRouter no longer serves this model.`;
+  }
   if (status === 429 && provider.id === "openrouter") {
     return `OpenRouter rate limit or free model capacity reached for ${model.id}. Try another free model, or wait and retry.`;
   }
@@ -333,7 +340,7 @@ function buildProviderErrorMessage(provider, model, status, errText) {
 }
 
 function isRetriableProviderError(status) {
-  return [429, 500, 502, 503, 504].includes(Number(status));
+  return [404, 429, 500, 502, 503, 504].includes(Number(status));
 }
 
 async function requestGeneration({ baseUrl, headers, modelId, userContent, intensity }) {
@@ -430,6 +437,7 @@ export async function generateWithAi(prompt, lang, { providerId, modelId, intens
         finalErr.model = candidate.id;
         throw finalErr;
       }
+      console.warn(`AI fallback: retrying after ${candidate.id} returned ${status}`);
     }
   }
 
