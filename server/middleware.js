@@ -1,4 +1,4 @@
-import { resolveSession } from "./auth.js";
+import { extractSessionTokenFromCookie, resolveSession } from "./auth.js";
 import { getDailyUsage } from "./db.js";
 
 export function authOptional(req, res, next) {
@@ -37,6 +37,8 @@ export function adminRequired(req, res, next) {
 }
 
 function extractToken(req) {
+  const cookieToken = extractSessionTokenFromCookie(req.headers.cookie);
+  if (cookieToken) return cookieToken;
   const header = req.headers.authorization;
   if (header?.startsWith("Bearer ")) return header.slice(7);
   return req.headers["x-session-token"] || null;

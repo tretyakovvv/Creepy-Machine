@@ -13,6 +13,51 @@ import {
 } from "./db.js";
 
 const SESSION_DAYS = 30;
+const SESSION_COOKIE_NAME = "cm_auth_token";
+
+function getSessionCookieDomain() {
+  const configured = (process.env.SESSION_COOKIE_DOMAIN || "").trim();
+  if (configured) return configured.replace(/^\.+/, "");
+
+  const siteUrl = (process.env.SITE_URL || "").trim();
+  try {
+    const host = new URL(siteUrl).hostname;
+    if (host && !["localhost", "127.0.0.1", "::1"].includes(host)) return host.replace(/^www\./, "");
+  } catch {
+    /* ignore */
+  }
+  return "";
+}
+
+function getSessionCookieBaseOptions() {
+  const secure = (process.env.SITE_URL || "").startsWith("https://") || process.env.NODE_ENV === "production";
+  const options = [
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${SESSION_DAYS * 24 * 60 * 60}`,
+  ];
+  const domain = getSessionCookieDomain();
+  if (domain) options.push(`Domain=${domain}`);
+  if (secure) options.push("Secure");
+  return options;
+}
+
+export function setSessionCookie(res, token) {
+  res.setHeader("Set-Cookie", [
+    `${SESSION_COOKIE_NAME}=${encodeURIComponent(token)}; ${getSessionCookieBaseOptions().join("; ")}`,
+  ]);
+}
+
+export function clearSessionCookie(res) {
+  const opts = ["Path=/", "HttpOnly", "SameSite=Lax", "Max-Age=0"];
+  const domain = getSessionCookieDomain();
+  if (domain) opts.push(`Domain=${domain}`);
+  if ((process.env.SITE_URL || "").startsWith("https://") || process.env.NODE_ENV === "production") {
+    opts.push("Secure");
+  }
+  res.setHeader("Set-Cookie", [`${SESSION_COOKIE_NAME}=; ${opts.join("; ")}`]);
+}
 
 function getGoogleClient() {
   const clientId = getConfiguredGoogleClientId();
@@ -105,6 +150,12 @@ export function createGuestSessionForIp(ip) {
     upsertGuestAccess(ipHash, session.user.id);
     return session;
   });
+}
+
+export function extractSessionTokenFromCookie(cookieHeader) {
+  if (!cookieHeader) return null;
+  const match = String(cookieHeader).match(new RegExp(`(?:^|;\\s*)${SESSION_COOKIE_NAME}=([^;]+)`));
+  return match ? decodeURIComponent(match[1]) : null;
 }
 
 export function resolveSession(token) {

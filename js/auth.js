@@ -189,24 +189,26 @@
   }
 
   async function restoreSession() {
-    const token = getToken();
-    if (!token) {
-      window.CMStore.clearSession();
-      return null;
-    }
-
     try {
-      const res = await fetch("/api/auth/me", { headers: authHeaders() });
+      const token = getToken();
+      const res = await fetch("/api/auth/me", {
+        headers: token ? authHeaders() : undefined,
+      });
       if (!res.ok) {
-        setToken(null);
-        window.CMStore.clearSession();
+        if (!token) window.CMStore.clearSession();
+        else {
+          setToken(null);
+          window.CMStore.clearSession();
+        }
         return null;
       }
       const data = await res.json();
       const user = { ...data.user, subscription: data.subscription };
+      if (data.token) setToken(data.token);
       window.CMStore.setSession(user);
       return user;
     } catch {
+      window.CMStore.clearSession();
       return null;
     }
   }

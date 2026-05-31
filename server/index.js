@@ -11,6 +11,8 @@ import {
   destroySession,
   resolveSession,
   getConfiguredGoogleAuth,
+  setSessionCookie,
+  clearSessionCookie,
 } from "./auth.js";
 import {
   generateWithAi,
@@ -49,6 +51,15 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+
+function sendSessionResponse(res, session) {
+  setSessionCookie(res, session.token);
+  return res.json({
+    token: session.token,
+    user: session.user,
+    subscription: session.subscription,
+  });
+}
 
 app.get("/api/health", (_req, res) => {
   const googleAuth = getConfiguredGoogleAuth();
@@ -98,11 +109,7 @@ app.post("/api/auth/dev", (req, res) => {
     provider: tempGoogleAuthEnabled ? "google" : "dev",
   });
 
-  res.json({
-    token: session.token,
-    user: session.user,
-    subscription: session.subscription,
-  });
+  sendSessionResponse(res, session);
 });
 
 app.get("/api/content", (_req, res) => {
@@ -130,11 +137,7 @@ app.post("/api/auth/google", async (req, res) => {
     const userData = await verifyGoogleCredential(credential);
     const session = createUserSession(userData);
 
-    res.json({
-      token: session.token,
-      user: session.user,
-      subscription: session.subscription,
-    });
+    sendSessionResponse(res, session);
   } catch (err) {
     console.error("Google auth error:", err.message);
     const code =
@@ -157,11 +160,7 @@ app.post("/api/auth/guest", (req, res) => {
       req.socket?.remoteAddress ||
       "";
     const session = createGuestSessionForIp(ip);
-    res.json({
-      token: session.token,
-      user: session.user,
-      subscription: session.subscription,
-    });
+    sendSessionResponse(res, session);
   } catch (err) {
     const status = err.status || 500;
     res.status(status).json({ error: err.message || "GUEST_AUTH_FAILED" });
@@ -172,7 +171,9 @@ app.get("/api/auth/me", authOptional, (req, res) => {
   if (!req.user) {
     return res.status(401).json({ error: "NOT_AUTHENTICATED" });
   }
+  if (req.token) setSessionCookie(res, req.token);
   res.json({
+    token: req.token || null,
     user: req.user,
     subscription: req.user.subscription,
   });
@@ -180,12 +181,14 @@ app.get("/api/auth/me", authOptional, (req, res) => {
 
 app.post("/api/auth/logout", authOptional, (req, res) => {
   if (req.token) destroySession(req.token);
+  clearSessionCookie(res);
   res.json({ ok: true });
 });
 
 app.delete("/api/auth/account", authRequired, (req, res) => {
   const deleted = deleteUserAccount(req.user.id);
   if (req.token) destroySession(req.token);
+  clearSessionCookie(res);
   res.json({ ok: deleted });
 });
 
