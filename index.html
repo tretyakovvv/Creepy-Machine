@@ -3,20 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Creepy Machine is an AI creepypasta generator and horror story writer for English and Russian prompts. Generate dark stories, horror ideas, and creepy scenarios online.">
+  <meta name="description" content="Creepy Machine is an AI creepypasta generator, horror story writer, and dark prompt tool for English and Russian prompts. Generate eerie stories, horror ideas, and creepy scenarios online.">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <link rel="canonical" href="https://creepymachine.ru/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Creepy Machine">
-  <meta property="og:title" content="Creepy Machine — AI creepypasta generator and horror story writer">
+  <meta property="og:title" content="Creepy Machine — AI creepypasta generator, horror story writer, and dark prompt tool">
   <meta property="og:description" content="Generate creepypastas, horror stories, and dark prompts online with Creepy Machine.">
   <meta property="og:url" content="https://creepymachine.ru/">
   <meta property="og:image" content="https://creepymachine.ru/CreepyLogo.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Creepy Machine — AI creepypasta generator and horror story writer">
+  <meta name="twitter:title" content="Creepy Machine — AI creepypasta generator, horror story writer, and dark prompt tool">
   <meta name="twitter:description" content="Generate creepypastas, horror stories, and dark prompts online with Creepy Machine.">
   <meta name="twitter:image" content="https://creepymachine.ru/CreepyLogo.png">
-  <title>Creepy Machine — AI creepypasta generator and horror story writer</title>
+  <title>Creepy Machine — AI creepypasta generator, horror story writer, and dark prompt tool</title>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://creepymachine.ru/#website",
+          "url": "https://creepymachine.ru/",
+          "name": "Creepy Machine",
+          "description": "AI creepypasta generator and horror story writer for dark prompts, eerie story ideas, and nightmare-themed content.",
+          "inLanguage": ["en", "ru"]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://creepymachine.ru/#app",
+          "name": "Creepy Machine",
+          "applicationCategory": "EntertainmentApplication",
+          "operatingSystem": "Web",
+          "url": "https://creepymachine.ru/",
+          "description": "An AI service for creepypasta, horror stories, and dark prompt generation."
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://creepymachine.ru/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What can Creepy Machine generate?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Creepy Machine generates creepypasta-style stories, horror scenes, unsettling prompts, and dark story ideas."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do I need to sign in to try the generator?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Free users can try the generator with a daily limit. Paid plans add more generations and priority service."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Which languages are supported?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The interface supports English and Russian, with additional localized UI labels for other languages."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  </script>
   <link rel="icon" type="image/png" href="/CreepyLogo.png">
   <link rel="apple-touch-icon" href="/CreepyLogo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,6 +95,25 @@
       <p class="hero-eyebrow">AI Horror Writer</p>
       <h1 class="title glitch" data-text="CREEPY MACHINE" data-i18n="hero.title">CREEPY MACHINE</h1>
       <p class="subtitle" data-i18n="hero.subtitle">Enter your nightmare. The machine writes AI creepypasta, horror stories, and dark prompts.</p>
+    </section>
+
+    <section class="section glass-panel seo-intro" aria-labelledby="seo-intro-title">
+      <div class="section-head section-head--center">
+        <h2 id="seo-intro-title">AI creepypasta generator for horror stories, dark prompts, and eerie ideas</h2>
+        <p class="hint">Built for people searching for a horror story generator, creepy prompt ideas, and atmospheric AI writing tools.</p>
+      </div>
+      <div class="seo-copy">
+        <p>Creepy Machine is a browser-based AI service for making horror content with a gothic, unsettling, and internet-creepypasta feel. Use it to draft a story opening, a scary scene, a cursed object prompt, or a full horror narrative.</p>
+        <p>The site is designed around common horror search intent like <strong>генератор крипипаст</strong>, <strong>AI horror story generator</strong>, <strong>creepypasta writer</strong>, and <strong>dark prompt generator</strong>. Free users can test the machine every day, while subscribers get more generations and priority service.</p>
+        <ul class="seo-points">
+          <li>Generate creepypasta, horror scenes, and unsettling prompts</li>
+          <li>Use fandom and genre inspiration to shape new ideas</li>
+          <li>Read the subscription details, business details, privacy policy, and terms from the footer</li>
+        </ul>
+      </div>
+      <noscript>
+        <p>This site works best with JavaScript enabled. The generator, fandom cards, and subscription plans will load after scripts run.</p>
+      </noscript>
     </section>
 
     <section id="generator" class="generator section glass-panel">
@@ -98,7 +171,23 @@
       <div class="catalog-carousel" data-carousel="fandoms" tabindex="0">
         <button type="button" class="carousel-btn carousel-btn--prev" aria-label="Previous">‹</button>
         <div class="catalog-track-wrap">
-          <div id="fandoms-grid" class="catalog-track"></div>
+          <div id="fandoms-grid" class="catalog-track">
+            <article class="catalog-card">
+              <span class="catalog-icon">☠</span>
+              <h3>Slender Man</h3>
+              <p>Faceless entity, forest static, missing children.</p>
+            </article>
+            <article class="catalog-card">
+              <span class="catalog-icon">⬡</span>
+              <h3>SCP Foundation</h3>
+              <p>Secure. Contain. Protect. Scientific horror archives.</p>
+            </article>
+            <article class="catalog-card">
+              <span class="catalog-icon">◎</span>
+              <h3>FNAF</h3>
+              <p>Animatronics that move when no one is watching.</p>
+            </article>
+          </div>
         </div>
         <button type="button" class="carousel-btn carousel-btn--next" aria-label="Next">›</button>
         <div class="carousel-dots" id="fandoms-dots"></div>
@@ -113,10 +202,47 @@
       <div class="catalog-carousel" data-carousel="genres" tabindex="0">
         <button type="button" class="carousel-btn carousel-btn--prev" aria-label="Previous">‹</button>
         <div class="catalog-track-wrap">
-          <div id="genres-grid" class="catalog-track"></div>
+          <div id="genres-grid" class="catalog-track">
+            <article class="catalog-card">
+              <span class="catalog-icon">🫀</span>
+              <h3>Body Horror</h3>
+              <p>Flesh, mutation, and transformation gone wrong.</p>
+            </article>
+            <article class="catalog-card">
+              <span class="catalog-icon">🌫</span>
+              <h3>Silent Hill Style</h3>
+              <p>Fog, guilt, and psychological dread.</p>
+            </article>
+            <article class="catalog-card">
+              <span class="catalog-icon">⛧</span>
+              <h3>Occult Horror</h3>
+              <p>Rituals, curses, and the thing that answers back.</p>
+            </article>
+          </div>
         </div>
         <button type="button" class="carousel-btn carousel-btn--next" aria-label="Next">›</button>
         <div class="carousel-dots" id="genres-dots"></div>
+      </div>
+    </section>
+
+    <section class="section glass-panel seo-faq" aria-labelledby="seo-faq-title">
+      <div class="section-head section-head--center">
+        <h2 id="seo-faq-title">Frequently searched questions</h2>
+        <p class="hint">Short answers that help both visitors and search engines understand the service.</p>
+      </div>
+      <div class="faq-list faq-list--wide">
+        <details class="faq-item" open>
+          <summary>Is Creepy Machine a creepypasta generator?</summary>
+          <p>Yes. It is built for generating creepypasta-style horror stories, dark prompts, and eerie scenario ideas.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I use it for Russian horror prompts?</summary>
+          <p>Yes. The interface supports Russian text, and the content is localized for English and Russian users.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Does the free plan have limits?</summary>
+          <p>Yes. Free users get a daily quota and are shown as low priority, while paid plans unlock more generations and priority service.</p>
+        </details>
       </div>
     </section>
 
