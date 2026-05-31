@@ -52,8 +52,8 @@ window.CM_CONFIG = {
           { en: "250 generations per month", ru: "250 генераций в месяц" },
           { en: "Priority service during busy hours", ru: "Приоритетное обслуживание в часы пик" },
           {
-            en: "Smarter AI model: DeepSeek V4 Flash (~12.7 ₽ / 1M input tokens)",
-            ru: "Более умная модель ИИ: DeepSeek V4 Flash (~12,7 ₽ / 1M input-токенов)",
+            en: "More powerful and stable AI model: DeepSeek V4 Flash (~12.7 ₽ / 1M input tokens)",
+            ru: "Более мощная и стабильная модель ИИ: DeepSeek V4 Flash (~12,7 ₽ / 1M input-токенов)",
           },
           { en: "Best value for frequent use", ru: "Лучшее решение для частого использования" },
         ],
@@ -62,22 +62,22 @@ window.CM_CONFIG = {
     page: {
       ru: {
         headline: "Выберите пакет глав",
-        subtitle: "Покупайте только нужный объём генераций. Бесплатные генерации доступны без подписки, а платные планы открывают более умную модель ИИ DeepSeek V4 Flash после входа через Google.",
+        subtitle: "Покупайте только нужный объём генераций. Бесплатные генерации доступны без подписки, а платные планы открывают более мощную и стабильную модель ИИ DeepSeek V4 Flash после входа через Google.",
         benefits: [
           "Генерации списываются только после успешного ответа ИИ",
           "Бесплатные генерации остаются доступными без подписки",
-          "Подписка открывает более умную модель ИИ DeepSeek V4 Flash",
+          "Подписка открывает более мощную и стабильную модель ИИ DeepSeek V4 Flash",
           "Для покупки подписки нужен вход через Google",
         ],
         contact: "Вопросы по оплате, возврату или удалению аккаунта: tretyaaakov@gmail.com",
       },
       en: {
         headline: "Choose a chapter pack",
-        subtitle: "Buy only the generation volume you need. Free generations stay available without a subscription, and paid plans unlock a smarter AI model, DeepSeek V4 Flash, after Google sign-in.",
+        subtitle: "Buy only the generation volume you need. Free generations stay available without a subscription, and paid plans unlock a more powerful and stable AI model, DeepSeek V4 Flash, after Google sign-in.",
         benefits: [
           "Generations are charged only after successful AI output",
           "Free generations stay available without a subscription",
-          "The subscription unlocks a smarter AI model: DeepSeek V4 Flash",
+          "The subscription unlocks a more powerful and stable AI model: DeepSeek V4 Flash",
           "Google sign-in is required to buy a plan",
         ],
         contact: "Need help with payment, refunds, or account deletion? Write to tretyaaakov@gmail.com",

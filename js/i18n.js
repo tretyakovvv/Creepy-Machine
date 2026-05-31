@@ -66,7 +66,7 @@
       },
       subscription: {
         title: "Unlock the Abyss",
-        subtitle: "More generations, priority service, and a smarter AI model for subscribers",
+        subtitle: "More generations, priority service, and a more powerful and stable AI model for subscribers",
         free: "Free",
         perMonth: "/ month",
         generations: "{n} generations / month",
@@ -169,7 +169,7 @@
       },
       subscription: {
         title: "Открой бездну",
-        subtitle: "Больше генераций, приоритетное обслуживание и более умная модель ИИ для подписчиков",
+        subtitle: "Больше генераций, приоритетное обслуживание и более мощная и стабильная модель ИИ для подписчиков",
         free: "Бесплатно",
         perMonth: "/ мес",
         generations: "{n} генераций / месяц",
