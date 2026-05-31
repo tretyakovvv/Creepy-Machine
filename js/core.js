@@ -364,10 +364,16 @@
       if (data.fandoms?.length) patch.fandoms = data.fandoms;
       if (data.genres?.length) patch.genres = data.genres;
       if (data.faq?.length) patch.faq = data.faq;
+      if (data.subscriptionPlans?.length) {
+        patch.subscription = {
+          ...settings.subscription,
+          plans: data.subscriptionPlans,
+        };
+      }
       if (data.requisites) patch.requisites = data.requisites;
       if (data.subscriptionPage) {
         patch.subscription = {
-          ...settings.subscription,
+          ...(patch.subscription || settings.subscription),
           page: data.subscriptionPage,
         };
       }

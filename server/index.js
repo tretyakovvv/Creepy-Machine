@@ -112,6 +112,7 @@ app.get("/api/content", (_req, res) => {
     fandoms: fandoms || null,
     genres: genres || null,
     faq: getSetting("faq") || null,
+    subscriptionPlans: getSetting("subscription_plans") || null,
     subscriptionPage: getSetting("subscription_page") || null,
     requisites: getSetting("requisites") || null,
     privacyPolicyRu: getSetting("privacy_policy_ru") || null,
