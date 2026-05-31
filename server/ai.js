@@ -16,8 +16,6 @@ export const DEFAULT_AI_PROVIDERS = [
         enabled: true,
         isDefault: true,
       },
-      { id: "openai/gpt-oss-20b:free", name: "OpenAI GPT-OSS 20B", enabled: true },
-      { id: "meta-llama/llama-3.2-3b-instruct:free", name: "Llama 3.2 3B Instruct", enabled: true },
     ],
   },
   {
@@ -43,8 +41,6 @@ const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
 const OPENROUTER_FREE_MODEL_LIMIT = parseInt(process.env.OPENROUTER_FREE_MODEL_LIMIT || "40", 10);
 const STABLE_FREE_MODEL_IDS = new Set([
   "openrouter/free",
-  "openai/gpt-oss-20b:free",
-  "meta-llama/llama-3.2-3b-instruct:free",
 ]);
 
 const ENV_API_KEYS = {
@@ -155,6 +151,7 @@ function isFreeTextModel(model) {
 
 function sanitizeModelName(nameOrId) {
   return String(nameOrId || "")
+    .replace(/^OpenRouter Router$/i, "Free Models Router")
     .replace(/\s*\((?:free|бесплатно)\)\s*/gi, "")
     .replace(/\s*:\s*free\b/gi, "")
     .replace(/\bfree\s+models?\s+router\b/gi, "Model Router")
@@ -162,6 +159,70 @@ function sanitizeModelName(nameOrId) {
     .replace(/\bfree\b/gi, "")
     .replace(/\s{2,}/g, " ")
     .trim();
+}
+
+async function probeChatModel(provider, model) {
+  const apiKey = getProviderApiKey(provider);
+  if (!apiKey) return { available: false, status: 503, message: "API_KEY_NOT_CONFIGURED" };
+
+  const baseUrl = normalizeChatCompletionsUrl(
+    provider.baseUrl || "https://openrouter.ai/api/v1/chat/completions"
+  );
+
+  const headers = {
+    Authorization: `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+  };
+
+  if (provider.id === "openrouter" || baseUrl.includes("openrouter")) {
+    const siteUrl = process.env.SITE_URL;
+    if (siteUrl && !isLocalSiteUrl(siteUrl)) {
+      headers["HTTP-Referer"] = siteUrl;
+    }
+    headers["X-Title"] = "Creepy Machine";
+  }
+
+  const response = await fetch(baseUrl, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      model: model.id,
+      messages: [
+        { role: "system", content: "Reply with one short word." },
+        { role: "user", content: "ping" },
+      ],
+      temperature: 0,
+      max_tokens: 1,
+    }),
+  });
+
+  if (!response.ok) {
+    const message = await parseProviderError(response);
+    return {
+      available: false,
+      status: response.status,
+      message: message || `AI provider error: ${response.status}`,
+    };
+  }
+
+  return { available: true, status: 200, message: "ok" };
+}
+
+export async function probeModelAvailability(providerId, modelId) {
+  try {
+    const providers = getAiProviders();
+    const provider = providers.find((p) => p.id === providerId);
+    if (!provider) return { available: false, status: 404, message: "PROVIDER_NOT_FOUND" };
+    const model = (provider.models || []).find((m) => m.id === modelId && m.enabled !== false);
+    if (!model) return { available: false, status: 404, message: "MODEL_NOT_FOUND" };
+    return await probeChatModel(provider, model);
+  } catch (err) {
+    return {
+      available: false,
+      status: err?.status || 503,
+      message: err?.message || "MODEL_PROBE_FAILED",
+    };
+  }
 }
 
 function normalizeModel(model) {
@@ -215,6 +276,10 @@ async function fetchOpenRouterFreeTextModels() {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+export async function inspectOpenRouterFreeModels() {
+  return fetchOpenRouterFreeTextModels();
 }
 
 export async function refreshOpenRouterFreeModels(providers = getAllAiProviders()) {

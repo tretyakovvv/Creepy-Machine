@@ -22,6 +22,7 @@ import {
   saveAiProviders,
   mergeAiProvidersWithDefaults,
   refreshOpenRouterFreeModels,
+  probeModelAvailability,
 } from "./ai.js";
 import {
   incrementDailyUsage,
@@ -612,6 +613,32 @@ app.get("/api/admin/stats", adminRequired, (_req, res) => {
   } catch (err) {
     console.error("Stats error:", err);
     res.status(500).json({ error: "STATS_FAILED", message: err.message });
+  }
+});
+
+app.get("/api/admin/model-health", adminRequired, async (_req, res) => {
+  try {
+    const currentModels = getPublicModels();
+    const healthChecks = await Promise.all(
+      currentModels.map(async (model) => {
+        const result = await probeModelAvailability(model.providerId, model.id);
+        return {
+          ...model,
+          available: !!result.available,
+          status: result.status ?? 500,
+          message: result.message || (result.available ? "ok" : "unavailable"),
+        };
+      })
+    );
+    res.json({
+      provider: "openrouter",
+      models: healthChecks,
+      liveCount: healthChecks.filter((model) => model.available).length,
+      unavailable: healthChecks.filter((model) => !model.available).map((m) => m.id),
+    });
+  } catch (err) {
+    console.error("Model health error:", err);
+    res.status(500).json({ error: "MODEL_HEALTH_FAILED", message: err.message });
   }
 });
 

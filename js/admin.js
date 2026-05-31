@@ -97,6 +97,15 @@
     if (el) el.textContent = value ?? "—";
   }
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
   async function loadStats() {
     try {
       const res = await fetch("/api/admin/stats", { headers: adminHeaders() });
@@ -138,6 +147,35 @@
     }
   }
 
+  async function loadModelHealth() {
+    const list = document.getElementById("admin-model-health");
+    if (!list) return;
+    list.innerHTML = `<li class="admin-top-pages-empty">Checking models…</li>`;
+    try {
+      const res = await fetch("/api/admin/model-health", { headers: adminHeaders() });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "MODEL_HEALTH_FAILED");
+
+      const models = Array.isArray(data.models) ? data.models : [];
+      list.innerHTML = models.length
+        ? models
+            .map(
+              (model) => `
+                <li>
+                  <span class="admin-top-page-path">${escapeHtml(model.name || model.id)} <small>${escapeHtml(model.id)}</small></span>
+                  <span class="admin-model-status ${model.available ? "is-ok" : "is-bad"}" title="${escapeHtml(model.message || "")}">
+                    ${model.available ? "live" : "down"}${model.status ? ` · ${escapeHtml(String(model.status))}` : ""}
+                  </span>
+                </li>
+              `
+            )
+            .join("")
+        : `<li class="admin-top-pages-empty">No free models found</li>`;
+    } catch (err) {
+      list.innerHTML = `<li class="admin-top-pages-empty">Failed to check models: ${escapeHtml(err.message)}</li>`;
+    }
+  }
+
   async function loadForm() {
     const s = window.CMStore.getSettings();
     const remote = await loadFromServer();
@@ -170,6 +208,7 @@
     setJson("cfg-ai-providers", remote?.aiProviders || getDefaultProviders());
     loadDbStatus();
     loadStats();
+    loadModelHealth();
   }
 
   function getDefaultPrivacyRu() {
@@ -213,8 +252,6 @@
             enabled: true,
             isDefault: true,
           },
-          { id: "openai/gpt-oss-20b:free", name: "OpenAI GPT-OSS 20B", enabled: true },
-          { id: "meta-llama/llama-3.2-3b-instruct:free", name: "Llama 3.2 3B Instruct", enabled: true },
         ],
       },
       {
@@ -349,11 +386,13 @@
         document.getElementById(tab.dataset.panel)?.classList.add("is-active");
         if (tab.dataset.panel === "panel-db") loadDbStatus();
         if (tab.dataset.panel === "panel-stats") loadStats();
+        if (tab.dataset.panel === "panel-ai") loadModelHealth();
       });
     });
 
     document.getElementById("admin-refresh-db")?.addEventListener("click", loadDbStatus);
     document.getElementById("admin-refresh-stats")?.addEventListener("click", loadStats);
+    document.getElementById("admin-refresh-model-health")?.addEventListener("click", loadModelHealth);
   }
 
   function init() {

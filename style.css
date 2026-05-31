@@ -1616,6 +1616,34 @@ a.btn-primary:hover,
   font-weight: 600;
 }
 
+.admin-top-page-path small {
+  display: block;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  margin-top: 0.2rem;
+}
+
+.admin-model-status {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.admin-model-status.is-ok {
+  color: #6fcf97;
+  border-color: rgba(111, 207, 151, 0.28);
+  background: rgba(111, 207, 151, 0.08);
+}
+
+.admin-model-status.is-bad {
+  color: #ff7b7b;
+  border-color: rgba(255, 123, 123, 0.28);
+  background: rgba(255, 123, 123, 0.08);
+}
+
 .admin-top-pages-empty {
   color: var(--text-dim);
   padding: 0.25rem 0;
