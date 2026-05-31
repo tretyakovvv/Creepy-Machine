@@ -36,6 +36,8 @@ import {
   isEncryptionEnabled,
   deleteExpiredSessions,
   getDatabaseStatus,
+  recordPageView,
+  getAdminStats,
   deleteUserAccount,
   savePayment,
   getPayment,
@@ -46,11 +48,39 @@ import { authOptional, authRequired, adminRequired, checkCanGenerate } from "./m
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, "..");
 const PORT = parseInt(process.env.PORT || "3000", 10);
+const TRACKED_PAGE_PATHS = new Set([
+  "/",
+  "/index.html",
+  "/subscription.html",
+  "/privacy.html",
+  "/terms.html",
+  "/requisites.html",
+]);
 
 const app = express();
 app.set("trust proxy", 1);
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+
+app.use((req, res, next) => {
+  if (req.method !== "GET") return next();
+  const normalizedPath = req.path === "/index.html" ? "/" : req.path;
+  const shouldTrack = TRACKED_PAGE_PATHS.has(normalizedPath);
+  if (!shouldTrack) return next();
+
+  res.on("finish", () => {
+    const contentType = String(res.getHeader("content-type") || "");
+    if (res.statusCode !== 200) return;
+    if (!contentType.includes("text/html")) return;
+    try {
+      recordPageView(normalizedPath, new Date().toISOString().slice(0, 10));
+    } catch (err) {
+      console.warn("Page view tracking failed:", err.message);
+    }
+  });
+
+  next();
+});
 
 function sendSessionResponse(res, session) {
   setSessionCookie(res, session.token);
@@ -573,6 +603,15 @@ app.get("/api/admin/db-status", adminRequired, (_req, res) => {
   } catch (err) {
     console.error("DB status error:", err);
     res.status(500).json({ error: "DB_STATUS_FAILED", message: err.message });
+  }
+});
+
+app.get("/api/admin/stats", adminRequired, (_req, res) => {
+  try {
+    res.json(getAdminStats());
+  } catch (err) {
+    console.error("Stats error:", err);
+    res.status(500).json({ error: "STATS_FAILED", message: err.message });
   }
 });
 

@@ -40,6 +40,7 @@
 
       <nav class="admin-tabs">
         <button type="button" class="admin-tab is-active" data-panel="panel-general">General</button>
+        <button type="button" class="admin-tab" data-panel="panel-stats">Stats</button>
         <button type="button" class="admin-tab" data-panel="panel-content">Fandoms & Genres</button>
         <button type="button" class="admin-tab" data-panel="panel-legal">Legal & FAQ</button>
         <button type="button" class="admin-tab" data-panel="panel-subscription">Subscription Page</button>
@@ -53,6 +54,45 @@
       <div id="panel-general" class="admin-panel-section is-active glass-panel">
         <p class="hint">Admin password is verified against <code>ADMIN_PASSWORD</code> on backend login and is not edited here.</p>
         <label>Free generations per day <input type="number" id="cfg-free-limit" min="0"></label>
+      </div>
+
+      <div id="panel-stats" class="admin-panel-section glass-panel">
+        <p class="hint">Quick overview of site visits and generations.</p>
+        <div class="admin-stats-grid">
+          <article class="admin-stat-card">
+            <span>Visits today</span>
+            <strong id="stat-visits-today">—</strong>
+          </article>
+          <article class="admin-stat-card">
+            <span>Visits total</span>
+            <strong id="stat-visits-total">—</strong>
+          </article>
+          <article class="admin-stat-card">
+            <span>Generations today</span>
+            <strong id="stat-generations-today">—</strong>
+          </article>
+          <article class="admin-stat-card">
+            <span>Generations total</span>
+            <strong id="stat-generations-total">—</strong>
+          </article>
+        </div>
+        <div class="admin-stats-grid admin-stats-grid--compact">
+          <article class="admin-stat-card">
+            <span>Active subscriptions</span>
+            <strong id="stat-active-subscriptions">—</strong>
+          </article>
+          <article class="admin-stat-card">
+            <span>Paid generations left</span>
+            <strong id="stat-paid-left">—</strong>
+          </article>
+        </div>
+        <div class="admin-top-pages">
+          <div class="admin-top-pages-head">
+            <h3>Top pages</h3>
+            <button type="button" id="admin-refresh-stats" class="btn-ghost">Refresh stats</button>
+          </div>
+          <ul id="stat-top-pages" class="admin-top-pages-list"></ul>
+        </div>
       </div>
 
       <div id="panel-content" class="admin-panel-section glass-panel">

@@ -92,6 +92,52 @@
     }
   }
 
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value ?? "—";
+  }
+
+  async function loadStats() {
+    try {
+      const res = await fetch("/api/admin/stats", { headers: adminHeaders() });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "STATS_FAILED");
+
+      setText("stat-visits-today", String(data.visitsToday ?? 0));
+      setText("stat-visits-total", String(data.visitsTotal ?? 0));
+      setText("stat-generations-today", String(data.generationsToday ?? 0));
+      setText("stat-generations-total", String(data.generationsTotal ?? 0));
+      setText("stat-active-subscriptions", String(data.activeSubscriptions ?? 0));
+      setText("stat-paid-left", String(data.paidGenerationsLeft ?? 0));
+
+      const list = document.getElementById("stat-top-pages");
+      if (list) {
+        const pages = Array.isArray(data.topPages) ? data.topPages : [];
+        list.innerHTML = pages.length
+          ? pages
+              .map(
+                (item) => `
+                  <li>
+                    <span class="admin-top-page-path">${item.path || "/"}</span>
+                    <span class="admin-top-page-count">${item.count ?? 0}</span>
+                  </li>
+                `
+              )
+              .join("")
+          : `<li class="admin-top-pages-empty">No visits yet</li>`;
+      }
+    } catch (err) {
+      setText("stat-visits-today", "—");
+      setText("stat-visits-total", "—");
+      setText("stat-generations-today", "—");
+      setText("stat-generations-total", "—");
+      setText("stat-active-subscriptions", "—");
+      setText("stat-paid-left", "—");
+      const list = document.getElementById("stat-top-pages");
+      if (list) list.innerHTML = `<li class="admin-top-pages-empty">Failed to load stats: ${err.message}</li>`;
+    }
+  }
+
   async function loadForm() {
     const s = window.CMStore.getSettings();
     const remote = await loadFromServer();
@@ -123,6 +169,7 @@
     setJson("cfg-terms-ru", remote?.termsRu || window.CMI18n?.legal?.terms?.ru || getDefaultTermsRu());
     setJson("cfg-ai-providers", remote?.aiProviders || getDefaultProviders());
     loadDbStatus();
+    loadStats();
   }
 
   function getDefaultPrivacyRu() {
@@ -300,10 +347,12 @@
         tab.classList.add("is-active");
         document.getElementById(tab.dataset.panel)?.classList.add("is-active");
         if (tab.dataset.panel === "panel-db") loadDbStatus();
+        if (tab.dataset.panel === "panel-stats") loadStats();
       });
     });
 
     document.getElementById("admin-refresh-db")?.addEventListener("click", loadDbStatus);
+    document.getElementById("admin-refresh-stats")?.addEventListener("click", loadStats);
   }
 
   function init() {

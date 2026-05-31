@@ -137,6 +137,13 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS page_views (
+    path TEXT NOT NULL,
+    date TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (path, date)
+  );
+
   CREATE TABLE IF NOT EXISTS payments (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -158,6 +165,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_guest_access_user ON guest_access(user_id);
   CREATE INDEX IF NOT EXISTS idx_generations_user ON generations(user_id);
   CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
+  CREATE INDEX IF NOT EXISTS idx_page_views_date ON page_views(date);
 `);
 
 function encField(value) {
@@ -275,6 +283,13 @@ export function incrementDailyUsage(userId, date) {
     `INSERT INTO usage_daily (user_id, date, count) VALUES (?, ?, 1)
      ON CONFLICT(user_id, date) DO UPDATE SET count = count + 1`
   ).run(userId, date);
+}
+
+export function recordPageView(pagePath, date) {
+  db.prepare(
+    `INSERT INTO page_views (path, date, count) VALUES (?, ?, 1)
+     ON CONFLICT(path, date) DO UPDATE SET count = count + 1`
+  ).run(pagePath, date);
 }
 
 export function saveGeneration({ userId, prompt, result, lang, model }) {
@@ -441,6 +456,7 @@ export function getDatabaseStatus() {
     "usage_daily",
     "subscriptions",
     "generations",
+    "page_views",
     "site_settings",
   ]) {
     counts[table] = db.prepare(`SELECT count(*) AS count FROM ${table}`).get().count;
@@ -459,6 +475,9 @@ export function getDatabaseStatus() {
     generationResults: db
       .prepare("SELECT count(*) AS count FROM generations WHERE result LIKE 'cmenc1:%'")
       .get().count,
+    pageViewsToday: db
+      .prepare("SELECT COALESCE(sum(count), 0) AS count FROM page_views WHERE date = date('now')")
+      .get().count,
     sensitiveSettings: db
       .prepare(
         "SELECT count(*) AS count FROM site_settings WHERE key IN ('ai_providers') AND value LIKE 'cmenc1:%'"
@@ -473,6 +492,50 @@ export function getDatabaseStatus() {
     encryptionEnabled: isEncryptionEnabled(),
     counts,
     encryptedRows,
+  };
+}
+
+export function getAdminStats() {
+  const today = new Date().toISOString().slice(0, 10);
+  const visitsTotal = db
+    .prepare("SELECT COALESCE(sum(count), 0) AS count FROM page_views")
+    .get().count;
+  const visitsToday = db
+    .prepare("SELECT COALESCE(sum(count), 0) AS count FROM page_views WHERE date = ?")
+    .get(today).count;
+  const topPages = db
+    .prepare(
+      `SELECT path, COALESCE(sum(count), 0) AS count
+       FROM page_views
+       GROUP BY path
+       ORDER BY count DESC, path ASC
+       LIMIT 5`
+    )
+    .all();
+  const generationsTotal = db
+    .prepare("SELECT count(*) AS count FROM generations")
+    .get().count;
+  const generationsToday = db
+    .prepare("SELECT count(*) AS count FROM generations WHERE date(created_at) = ?")
+    .get(today).count;
+  const activeSubscriptions = db
+    .prepare("SELECT count(*) AS count FROM subscriptions WHERE active = 1")
+    .get().count;
+  const paidGenerationsLeft = db
+    .prepare(
+      "SELECT COALESCE(sum(CASE WHEN active = 1 AND generations_left IS NOT NULL THEN generations_left ELSE 0 END), 0) AS count FROM subscriptions"
+    )
+    .get().count;
+
+  return {
+    today,
+    visitsTotal,
+    visitsToday,
+    generationsTotal,
+    generationsToday,
+    activeSubscriptions,
+    paidGenerationsLeft,
+    topPages,
   };
 }
 
