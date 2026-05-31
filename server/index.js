@@ -405,8 +405,8 @@ app.post("/api/payments/create", authRequired, async (req, res) => {
   }
   const { planId } = req.body;
   const plans = getSetting("subscription_plans") || [
-    { id: "nightmare", price: 199, currency: "RUB", generationsPerMonth: 50 },
-    { id: "abyss", price: 499, currency: "RUB", generationsPerMonth: 200 },
+    { id: "nightmare", price: 199, currency: "RUB", generationsPerMonth: 100 },
+    { id: "abyss", price: 399, currency: "RUB", generationsPerMonth: 250 },
   ];
   const plan = plans.find((p) => p.id === planId);
   if (!plan) return res.status(400).json({ error: "PLAN_NOT_FOUND" });
@@ -512,8 +512,8 @@ app.post("/api/payments/activate", authRequired, (req, res) => {
   }
   const { planId } = req.body;
   const plans = getSetting("subscription_plans") || [
-    { id: "nightmare", generationsPerMonth: 50 },
-    { id: "abyss", generationsPerMonth: 200 },
+    { id: "nightmare", generationsPerMonth: 100 },
+    { id: "abyss", generationsPerMonth: 250 },
   ];
   const plan = plans.find((p) => p.id === planId);
   if (!plan) return res.status(400).json({ error: "PLAN_NOT_FOUND" });
